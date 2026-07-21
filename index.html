@@ -107,6 +107,9 @@
         .btn-icon { width: 35px; height: 35px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0; color: white;}
         .btn-edit { background-color: var(--warning); }
         .btn-delete { background-color: var(--danger); }
+        
+        /* Alerta de sin respuesta */
+        .no-answer { color: var(--danger); font-style: italic; font-weight: 500; }
 
         .stats-bar {
             display: flex; justify-content: space-between; background: #f8fafc; padding: 12px;
@@ -161,12 +164,12 @@
         </div>
         
         <div class="input-group">
-            <label>Pregunta</label>
+            <label>Pregunta (Obligatoria)</label>
             <input type="text" id="question-input" placeholder="Escribe aquí tu pregunta...">
         </div>
         <div class="input-group">
-            <label>Respuesta Correcta</label>
-            <input type="text" id="answer-input" placeholder="Escribe la respuesta exacta...">
+            <label>Respuesta Correcta (Opcional por ahora)</label>
+            <input type="text" id="answer-input" placeholder="Puedes dejarla en blanco y llenarla después...">
         </div>
         
         <button class="btn-primary" onclick="addQuestion()" style="margin-bottom: 15px;">
@@ -268,7 +271,7 @@
         let studyCards = [];
         let currentIndex = 0;
         let score = 0;
-        let currentMode = 'direct'; // 'direct' o 'multiple'
+        let currentMode = 'direct'; 
 
         window.onload = () => {
             updateSelectorUI();
@@ -315,9 +318,10 @@
         }
 
         function addQuestion() {
-            const q = document.getElementById('question-input').value;
-            const a = document.getElementById('answer-input').value;
-            if (q && a) {
+            const q = document.getElementById('question-input').value.trim();
+            const a = document.getElementById('answer-input').value.trim();
+            
+            if (q) {
                 flashcards.push({ question: q, answer: a });
                 saveData();
                 document.getElementById('question-input').value = '';
@@ -325,7 +329,7 @@
                 document.getElementById('question-input').focus();
                 updateListUI();
             } else {
-                alert("Llena la pregunta y la respuesta.");
+                alert("Debes escribir al menos la pregunta.");
             }
         }
 
@@ -357,11 +361,12 @@
             }
 
             flashcards.forEach((item, index) => {
+                let answerDisplay = item.answer !== "" ? item.answer : '<span class="no-answer">(Sin respuesta aún)</span>';
                 listEl.innerHTML += `
                     <div class="question-item">
                         <div class="question-item-text">
                             <strong>P:</strong> ${item.question}<br>
-                            <strong>R:</strong> ${item.answer}
+                            <strong>R:</strong> ${answerDisplay}
                         </div>
                         <div class="action-btns">
                             <button onclick="editQuestion(${index})" class="btn-icon btn-edit" title="Modificar"><i class="fas fa-edit"></i></button>
@@ -421,6 +426,14 @@
                 alert("Agrega preguntas a este cuestionario primero.");
                 return;
             }
+            
+            // Seguro: Verificar si hay preguntas sin respuesta antes de iniciar
+            const pendientes = flashcards.filter(f => f.answer === "");
+            if (pendientes.length > 0) {
+                alert("¡Espera! Tienes preguntas marcadas '(Sin respuesta aún)'. Usa el botón naranja del lápiz en la lista para completarlas antes de jugar.");
+                return;
+            }
+
             currentMode = mode;
             studyCards = shuffleArray(flashcards);
             currentIndex = 0;
@@ -459,10 +472,8 @@
 
         function generateMultipleChoice(correctAnswer) {
             let options = [correctAnswer];
-            // Buscar respuestas de otras preguntas
             let wrongAnswers = flashcards.map(f => f.answer).filter(a => a.toLowerCase() !== correctAnswer.toLowerCase());
             
-            // Rellenar si el usuario tiene menos de 4 preguntas en total
             const fillers = ["Ninguna de las opciones", "Consultar el manual de procedimientos", "Solicitar autorización al supervisor", "Todas las opciones mostradas"];
             while (wrongAnswers.length < 3) {
                 let filler = fillers.pop();
@@ -471,7 +482,7 @@
             
             wrongAnswers = shuffleArray(wrongAnswers);
             options = options.concat(wrongAnswers.slice(0, 3));
-            options = shuffleArray(options); // Revolver la respuesta correcta entre las falsas
+            options = shuffleArray(options); 
             
             const container = document.getElementById('multiple-choice-container');
             container.innerHTML = '';
@@ -500,7 +511,6 @@
                 feedback.className = "feedback incorrect";
                 if (btnElement) {
                     btnElement.classList.add('wrong-btn');
-                    // Resaltar en verde la que sí era correcta
                     document.querySelectorAll('.mc-option').forEach(b => {
                         if(b.innerText.trim().toLowerCase() === correctAnswer) b.classList.add('correct-btn');
                     });
