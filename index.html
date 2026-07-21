@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario</title>
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- jsPDF para Exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Iconos de FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        // TRUCO PWA EN UN SOLO ARCHIVO: Generar Manifest dinámico con el emoji 📕
+        const manifestData = {
+            name: "Plan de estudio",
+            short_name: "Cuestionario",
+            start_url: window.location.href,
+            display: "standalone",
+            background_color: "#f1f5f9",
+            theme_color: "#2563eb",
+            icons: [{
+                // Convertimos el emoji en un logo gráfico compatible
+                src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📕</text></svg>",
+                sizes: "512x512",
+                type: "image/svg+xml",
+                purpose: "any maskable"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/manifest+json'});
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        document.write(`<link rel="manifest" href="${manifestUrl}">`);
+    </script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --background: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        h2 { text-align: center; margin-top: 0; color: var(--primary); font-size: 26px; }
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
+        input {
+            width: 100%; padding: 12px; box-sizing: border-box;
+            border: 1px solid #e2e8f0; border-radius: 8px;
+            font-size: 15px; transition: border-color 0.2s;
+            background-color: #f8fafc;
+        }
+        input:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        button {
+            width: 100%; padding: 14px; margin-top: 10px;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); color: white; margin-top: 25px;}
+        .btn-pdf { background-color: #ef4444; color: white; margin-top: 10px; }
+        .btn-pdf:hover { background-color: #dc2626; }
+        .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); }
+        .hidden { display: none !important; }
+        
+        .stats-bar {
+            display: flex; justify-content: space-between;
+            background: #f8fafc; padding: 12px; border-radius: 8px;
+            margin-bottom: 20px; font-weight: 600; font-size: 14px; border: 1px solid #e2e8f0;
+        }
+        .question-box { 
+            background: #f8fafc; padding: 25px 20px; border-radius: 12px; 
+            text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+        .feedback { text-align: center; font-weight: bold; margin: 15px 0; font-size: 16px; min-height: 24px; }
+        .correct { color: var(--success); }
+        .incorrect { color: var(--danger); }
+        
+        .install-banner { 
+            background: #0f172a; color: white; padding: 12px; 
+            border-radius: 8px; text-align: center; margin-bottom: 20px; 
+            cursor: pointer; display: none; font-weight: 600; font-size: 14px;
+        }
+        .install-banner:hover { background: #1e293b; }
+    </style>
+</head>
+<body>
+
+    <!-- MODO CREADOR -->
+    <div class="container" id="setup-section">
+        <div class="install-banner" id="install-banner">
+            <i class="fas fa-download"></i> Instalar como Aplicación
+        </div>
+        
+        <h2>📕 Plan de estudio</h2>
+        
+        <div class="input-group">
+            <label>Pregunta</label>
+            <input type="text" id="question-input" placeholder="Ej: ¿Cuál es el procedimiento si la llave dinamométrica pierde calibración?">
+        </div>
+        <div class="input-group">
+            <label>Respuesta Correcta</label>
+            <input type="text" id="answer-input" placeholder="Ej: Recalibrar para recuperar la precisión.">
+        </div>
+        
+        <button class="btn-primary" onclick="addQuestion()">
+            <i class="fas fa-plus"></i> Agregar a la lista
+        </button>
+        
+        <div style="text-align: center; margin-top: 15px; font-size: 14px; color: var(--text-muted);">
+            Preguntas registradas: <span id="count" style="font-weight: bold; color: var(--primary); font-size: 16px;">0</span>
+        </div>
+        
+        <button class="btn-success" onclick="startStudy()">
+            <i class="fas fa-play"></i> Iniciar
+        </button>
+        <button class="btn-pdf" onclick="exportPDF()">
+            <i class="fas fa-file-pdf"></i> Guardar en PDF
+        </button>
+    </div>
+
+    <!-- MODO ESTUDIO -->
+    <div class="container hidden" id="study-section">
+        <div class="stats-bar">
+            <span id="question-counter"><i class="fas fa-list-ol"></i> 1/1</span>
+            <span id="score-counter"><i class="fas fa-star" style="color:#fbbf24;"></i> 0</span>
+        </div>
+        
+        <div class="question-box" id="display-question">
+            La pregunta aparecerá aquí
+        </div>
+        
+        <input type="text" id="user-answer" placeholder="Tu respuesta...">
+        
+        <p id="feedback" class="feedback"></p>
+        
+        <button class="btn-primary" id="check-btn" onclick="checkAnswer()">Comprobar</button>
+        <button class="btn-success hidden" id="next-btn" onclick="nextQuestion()">Siguiente <i class="fas fa-arrow-right"></i></button>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="container hidden" id="results-section">
+        <h2>📕 Plan de estudio</h2>
+        <div class="question-box" style="font-size: 24px; color: var(--primary);">
+            <span id="final-score">0/0</span>
+        </div>
+        <p id="final-message" style="text-align: center; font-weight: 600; margin-bottom: 25px;"></p>
+        
+        <button class="btn-primary" onclick="restartStudy()"><i class="fas fa-redo"></i> Repetir mismas preguntas</button>
+        <button class="btn-outline" onclick="location.reload()" style="margin-top: 10px;"><i class="fas fa-home"></i> Volver al inicio</button>
+    </div>
+
+    <script>
+        // ==========================================
+        // TRUCO PWA: Service Worker en un solo archivo
+        // ==========================================
+        const swCode = `
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(fetch(e.request).catch(() => new Response('Modo Offline')));
+            });
+        `;
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(swBlob);
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).then(() => {
+                console.log('Service Worker Interno Registrado');
+            }).catch(err => console.log('Error SW:', err));
+        }
+
+        // Lógica para mostrar el banner de instalación PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-banner').style.display = 'block';
+        });
+
+        document.getElementById('install-banner').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('install-banner').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // ==========================================
+        // Lógica de la Aplicación
+        // ==========================================
+        let flashcards = [];
+        let studyCards = [];
+        let currentIndex = 0;
+        let score = 0;
+
+        function addQuestion() {
+            const q = document.getElementById('question-input').value;
+            const a = document.getElementById('answer-input').value;
+            if (q && a) {
+                flashcards.push({ question: q, answer: a });
+                document.getElementById('count').innerText = flashcards.length;
+                document.getElementById('question-input').value = '';
+                document.getElementById('answer-input').value = '';
+                document.getElementById('question-input').focus();
+            }
+        }
+
+        function exportPDF() {
+            if (flashcards.length === 0) {
+                alert("Agrega al menos una pregunta antes de exportar.");
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.setTextColor(37, 99, 235);
+            doc.text("Plan de estudio", 14, 20);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            const date = new Date().toLocaleDateString();
+            doc.text(`Generado el: ${date} - Total de preguntas: ${flashcards.length}`, 14, 28);
+            
+            const tableData = flashcards.map((fc, i) => [i + 1, fc.question, fc.answer]);
+            
+            doc.autoTable({
+                startY: 35,
+                head: [['#', 'Pregunta', 'Respuesta Correcta']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [220, 38, 38] }, // Color rojo para combinar con el libro
+                styles: { fontSize: 10, cellPadding: 4 },
+                columnStyles: {
+                    0: { cellWidth: 15, halign: 'center' },
+                    1: { cellWidth: 85 },
+                    2: { cellWidth: 85 }
+                }
+            });
+            
+            doc.save('Plan_De_Estudio.pdf');
+        }
+
+        function shuffleArray(array) {
+            let newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startStudy() {
+            if (flashcards.length === 0) {
+                alert("Por favor, guarda al menos una pregunta primero.");
+                return;
+            }
+            studyCards = shuffleArray(flashcards);
+            currentIndex = 0;
+            score = 0;
+            document.getElementById('setup-section').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('study-section').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('check-btn').classList.remove('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('user-answer').focus();
+            
+            document.getElementById('question-counter').innerHTML = `<i class="fas fa-list-ol"></i> ${currentIndex + 1}/${studyCards.length}`;
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            document.getElementById('display-question').innerText = studyCards[currentIndex].question;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('user-answer').value.trim().toLowerCase();
+            const correctAnswer = studyCards[currentIndex].answer.trim().toLowerCase();
+            const feedback = document.getElementById('feedback');
+
+            if (userAnswer === correctAnswer) {
+                feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Correcto!';
+                feedback.className = "feedback correct";
+                score++;
+            } else {
+                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#64748b;">La respuesta era: <b>${studyCards[currentIndex].answer}</b></span>`;
+                feedback.className = "feedback incorrect";
+            }
+            
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('check-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < studyCards.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('study-section').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            document.getElementById('final-score').innerText = `${score} / ${studyCards.length}`;
+            
+            const message = document.getElementById('final-message');
+            const porcentaje = score / studyCards.length;
+            
+            if (porcentaje === 1) {
+                message.innerText = "¡Impecable! Estás listo para el ascenso.";
+            } else if (porcentaje >= 0.7) {
+                message.innerText = "¡Muy bien! Un pequeño repaso más y lo tienes.";
+            } else {
+                message.innerText = "Sigue practicando, la repetición es la clave del éxito.";
+            }
+        }
+
+        function restartStudy() { startStudy(); }
+    </script>
+</body>
+</html>
