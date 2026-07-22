@@ -41,6 +41,7 @@
             --success: #16a34a;
             --danger: #dc2626;
             --warning: #f59e0b;
+            --info: #3b82f6;
             --background: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -59,7 +60,7 @@
         }
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             background: var(--card-bg);
             padding: 25px;
             border-radius: 16px;
@@ -69,13 +70,17 @@
         h2 { text-align: center; margin-top: 0; color: var(--primary); font-size: 26px; }
         .input-group { margin-bottom: 15px; }
         label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
-        input, select {
+        
+        /* Cajas de texto ampliables */
+        textarea, select {
             width: 100%; padding: 12px; box-sizing: border-box;
             border: 1px solid #e2e8f0; border-radius: 8px;
             font-size: 15px; transition: border-color 0.2s;
             background-color: #f8fafc; font-family: inherit;
         }
-        input:focus, select:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        textarea { resize: vertical; min-height: 60px; }
+        textarea:focus, select:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
         button {
             width: 100%; padding: 14px; margin-top: 5px;
             border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
@@ -91,24 +96,27 @@
         .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); }
         .hidden { display: none !important; }
         
-        /* Lista de preguntas */
+        /* Lista de preguntas AMPLIABLE */
         .questions-list-container {
-            max-height: 220px; overflow-y: auto;
+            height: 280px; min-height: 150px; /* Altura inicial y mínima */
+            resize: vertical; /* Permite estirar la caja hacia abajo */
+            overflow-y: auto; /* Muestra barra de desplazamiento si es necesario */
             margin-top: 15px; border: 1px solid #e2e8f0;
             border-radius: 8px; padding: 10px; background: #f8fafc;
         }
         .question-item {
             background: white; padding: 12px; margin-bottom: 8px;
             border-radius: 6px; border: 1px solid #e2e8f0;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        .question-item-text { flex: 1; margin-right: 10px; font-size: 13px; color: #334155; }
+        .question-item-text { font-size: 13px; color: #334155; }
+        .question-item-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; }
         .action-btns { display: flex; gap: 5px; }
-        .btn-icon { width: 35px; height: 35px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0; color: white;}
+        .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0; color: white; font-size: 12px;}
         .btn-edit { background-color: var(--warning); }
         .btn-delete { background-color: var(--danger); }
+        .btn-move { background-color: var(--info); }
         
-        /* Alerta de sin respuesta */
         .no-answer { color: var(--danger); font-style: italic; font-weight: 500; }
 
         .stats-bar {
@@ -141,6 +149,11 @@
             border-radius: 8px; text-align: center; margin-bottom: 20px; 
             cursor: pointer; display: none; font-weight: 600; font-size: 14px;
         }
+        
+        .checkbox-container {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 15px; font-size: 14px; font-weight: 600; color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
@@ -165,11 +178,11 @@
         
         <div class="input-group">
             <label>Pregunta (Obligatoria)</label>
-            <input type="text" id="question-input" placeholder="Escribe aquí tu pregunta...">
+            <textarea id="question-input" rows="2" placeholder="Escribe aquí tu pregunta..."></textarea>
         </div>
         <div class="input-group">
             <label>Respuesta Correcta (Opcional por ahora)</label>
-            <input type="text" id="answer-input" placeholder="Puedes dejarla en blanco y llenarla después...">
+            <textarea id="answer-input" rows="2" placeholder="Puedes dejarla en blanco y llenarla después..."></textarea>
         </div>
         
         <button class="btn-primary" onclick="addQuestion()" style="margin-bottom: 15px;">
@@ -184,9 +197,15 @@
             <div id="questions-list"></div>
         </div>
         
-        <!-- Botones de Inicio de Estudio -->
+        <!-- Opciones de Estudio -->
         <div style="margin-top: 20px;">
             <label style="text-align: center;">Opciones de Estudio:</label>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="shuffle-checkbox"> 
+                <label for="shuffle-checkbox" style="margin:0; display:inline;">Mezclar orden al jugar (Aleatorio)</label>
+            </div>
+
             <button class="btn-primary" style="background-color: #8b5cf6;" onclick="startStudy('multiple')">
                 <i class="fas fa-list-ul"></i> Jugar Opción Múltiple
             </button>
@@ -208,8 +227,7 @@
         
         <div class="question-box" id="display-question">La pregunta aparecerá aquí</div>
         
-        <!-- Contenedores Dinámicos -->
-        <input type="text" id="user-answer" placeholder="Escribe tu respuesta exacta...">
+        <textarea id="user-answer" rows="3" placeholder="Escribe tu respuesta exacta..."></textarea>
         <div id="multiple-choice-container"></div>
         
         <p id="feedback" class="feedback"></p>
@@ -350,6 +368,26 @@
             document.getElementById('question-input').focus();
         }
 
+        function moveUp(index) {
+            if (index > 0) {
+                let temp = flashcards[index];
+                flashcards[index] = flashcards[index - 1];
+                flashcards[index - 1] = temp;
+                saveData();
+                updateListUI();
+            }
+        }
+
+        function moveDown(index) {
+            if (index < flashcards.length - 1) {
+                let temp = flashcards[index];
+                flashcards[index] = flashcards[index + 1];
+                flashcards[index + 1] = temp;
+                saveData();
+                updateListUI();
+            }
+        }
+
         function updateListUI() {
             const listEl = document.getElementById('questions-list');
             listEl.innerHTML = '';
@@ -365,12 +403,18 @@
                 listEl.innerHTML += `
                     <div class="question-item">
                         <div class="question-item-text">
-                            <strong>P:</strong> ${item.question}<br>
+                            <strong>${index + 1}. P:</strong> ${item.question}<br>
                             <strong>R:</strong> ${answerDisplay}
                         </div>
-                        <div class="action-btns">
-                            <button onclick="editQuestion(${index})" class="btn-icon btn-edit" title="Modificar"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteQuestion(${index})" class="btn-icon btn-delete" title="Borrar"><i class="fas fa-trash"></i></button>
+                        <div class="question-item-actions">
+                            <div class="action-btns">
+                                <button onclick="moveUp(${index})" class="btn-icon btn-move" title="Mover arriba"><i class="fas fa-arrow-up"></i></button>
+                                <button onclick="moveDown(${index})" class="btn-icon btn-move" title="Mover abajo"><i class="fas fa-arrow-down"></i></button>
+                            </div>
+                            <div class="action-btns">
+                                <button onclick="editQuestion(${index})" class="btn-icon btn-edit" title="Modificar"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteQuestion(${index})" class="btn-icon btn-delete" title="Borrar"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -403,14 +447,14 @@
                 theme: 'striped',
                 headStyles: { fillColor: [220, 38, 38] },
                 styles: { fontSize: 11, cellPadding: 5, overflow: 'linebreak' },
-                columnStyles: { 0: { cellWidth: 15, halign: 'center' }, 1: { cellWidth: 80 }, 2: { cellWidth: 85 } },
+                columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 85 }, 2: { cellWidth: 85 } },
                 margin: { top: 30, right: 15, bottom: 20, left: 15 }
             });
             doc.save(currentQuizName.replace(/\s+/g, '_') + '.pdf');
         }
 
         // ==========================================
-        // LÓGICA DE ESTUDIO (MIXTA)
+        // LÓGICA DE ESTUDIO
         // ==========================================
         function shuffleArray(array) {
             let newArray = [...array];
@@ -427,15 +471,21 @@
                 return;
             }
             
-            // Seguro: Verificar si hay preguntas sin respuesta antes de iniciar
             const pendientes = flashcards.filter(f => f.answer === "");
             if (pendientes.length > 0) {
-                alert("¡Espera! Tienes preguntas marcadas '(Sin respuesta aún)'. Usa el botón naranja del lápiz en la lista para completarlas antes de jugar.");
+                alert("¡Espera! Tienes preguntas marcadas '(Sin respuesta aún)'. Complétalas antes de jugar.");
                 return;
             }
 
             currentMode = mode;
-            studyCards = shuffleArray(flashcards);
+            
+            const wantsShuffle = document.getElementById('shuffle-checkbox').checked;
+            if (wantsShuffle) {
+                studyCards = shuffleArray(flashcards);
+            } else {
+                studyCards = [...flashcards]; 
+            }
+            
             currentIndex = 0;
             score = 0;
             document.getElementById('setup-section').classList.add('hidden');
@@ -466,22 +516,31 @@
                 txtInput.classList.add('hidden');
                 chkBtn.classList.add('hidden');
                 mcContainer.classList.remove('hidden');
-                generateMultipleChoice(studyCards[currentIndex].answer);
+                generateSmartOptions(studyCards[currentIndex].answer);
             }
         }
 
-        function generateMultipleChoice(correctAnswer) {
+        function generateSmartOptions(correctAnswer) {
             let options = [correctAnswer];
-            let wrongAnswers = flashcards.map(f => f.answer).filter(a => a.toLowerCase() !== correctAnswer.toLowerCase());
+            let ansStr = correctAnswer.trim();
+            let lower = ansStr.toLowerCase();
             
-            const fillers = ["Ninguna de las opciones", "Consultar el manual de procedimientos", "Solicitar autorización al supervisor", "Todas las opciones mostradas"];
-            while (wrongAnswers.length < 3) {
-                let filler = fillers.pop();
-                if(filler && !options.includes(filler)) wrongAnswers.push(filler);
+            let d1 = ansStr;
+            if (lower.includes("siempre")) d1 = d1.replace(/siempre/ig, "nunca");
+            else if (lower.includes("nunca")) d1 = d1.replace(/nunca/ig, "siempre");
+            else if (lower.includes("aumentar")) d1 = d1.replace(/aumentar/ig, "disminuir");
+            else if (lower.includes("disminuir")) d1 = d1.replace(/disminuir/ig, "aumentar");
+            else if (lower.match(/^no /i)) d1 = ansStr.substring(3);
+            else d1 = "No " + ansStr.charAt(0).toLowerCase() + ansStr.slice(1);
+            
+            let d2 = ansStr + ", pero solo si es estrictamente necesario.";
+            
+            let d3 = "Ignorar y proceder con precaución.";
+            if (ansStr.length > 5) {
+                d3 = "Evitar " + ansStr.charAt(0).toLowerCase() + ansStr.slice(1);
             }
             
-            wrongAnswers = shuffleArray(wrongAnswers);
-            options = options.concat(wrongAnswers.slice(0, 3));
+            options.push(d1, d2, d3);
             options = shuffleArray(options); 
             
             const container = document.getElementById('multiple-choice-container');
