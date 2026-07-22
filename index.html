@@ -71,7 +71,6 @@
         .input-group { margin-bottom: 15px; }
         label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
         
-        /* Cajas de texto ampliables */
         textarea, select {
             width: 100%; padding: 12px; box-sizing: border-box;
             border: 1px solid #e2e8f0; border-radius: 8px;
@@ -96,11 +95,9 @@
         .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); }
         .hidden { display: none !important; }
         
-        /* Lista de preguntas AMPLIABLE */
+        /* Lista ampliable */
         .questions-list-container {
-            height: 280px; min-height: 150px; /* Altura inicial y mínima */
-            resize: vertical; /* Permite estirar la caja hacia abajo */
-            overflow-y: auto; /* Muestra barra de desplazamiento si es necesario */
+            height: 280px; min-height: 150px; resize: vertical; overflow-y: auto;
             margin-top: 15px; border: 1px solid #e2e8f0;
             border-radius: 8px; padding: 10px; background: #f8fafc;
         }
@@ -128,19 +125,7 @@
             text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: 600; border: 1px solid #e2e8f0;
         }
         
-        /* Estilos Opción Múltiple */
-        .mc-option {
-            width: 100%; padding: 14px; margin-bottom: 10px;
-            border: 2px solid #e2e8f0; border-radius: 8px;
-            background: white; font-size: 15px; color: var(--text-main);
-            cursor: pointer; transition: 0.2s; text-align: left;
-            display: block; font-weight: 500;
-        }
-        .mc-option:hover:not(:disabled) { border-color: var(--primary); background: #f8fafc; }
-        .mc-option.correct-btn { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
-        .mc-option.wrong-btn { background: var(--danger) !important; color: white !important; border-color: var(--danger) !important; }
-
-        .feedback { text-align: center; font-weight: bold; margin: 15px 0; font-size: 16px; min-height: 24px; }
+        .feedback { text-align: center; font-weight: bold; margin: 15px 0; font-size: 16px; min-height: 24px; line-height: 1.4; }
         .correct { color: var(--success); }
         .incorrect { color: var(--danger); }
         
@@ -189,7 +174,6 @@
             <i class="fas fa-save"></i> Guardar Pregunta
         </button>
         
-        <!-- Lista de preguntas -->
         <div class="questions-list-container" id="list-container">
             <div style="font-size: 13px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">
                 Preguntas en esta lista: <span id="count" style="color: var(--primary);">0</span>
@@ -197,20 +181,15 @@
             <div id="questions-list"></div>
         </div>
         
-        <!-- Opciones de Estudio -->
+        <!-- Opciones de Estudio Mejoradas -->
         <div style="margin-top: 20px;">
-            <label style="text-align: center;">Opciones de Estudio:</label>
-            
             <div class="checkbox-container">
                 <input type="checkbox" id="shuffle-checkbox"> 
                 <label for="shuffle-checkbox" style="margin:0; display:inline;">Mezclar orden al jugar (Aleatorio)</label>
             </div>
 
-            <button class="btn-primary" style="background-color: #8b5cf6;" onclick="startStudy('multiple')">
-                <i class="fas fa-list-ul"></i> Jugar Opción Múltiple
-            </button>
-            <button class="btn-success" onclick="startStudy('direct')">
-                <i class="fas fa-keyboard"></i> Examen Escrito (Directo)
+            <button class="btn-success" style="margin-top: 15px;" onclick="startStudy()">
+                <i class="fas fa-play"></i> Iniciar Examen Directo
             </button>
             <button class="btn-pdf" onclick="exportPDF()">
                 <i class="fas fa-file-pdf"></i> Guardar en PDF
@@ -227,8 +206,7 @@
         
         <div class="question-box" id="display-question">La pregunta aparecerá aquí</div>
         
-        <textarea id="user-answer" rows="3" placeholder="Escribe tu respuesta exacta..."></textarea>
-        <div id="multiple-choice-container"></div>
+        <textarea id="user-answer" rows="3" placeholder="Escribe tu respuesta aquí..."></textarea>
         
         <p id="feedback" class="feedback"></p>
         
@@ -245,7 +223,7 @@
         </div>
         <p id="final-message" style="text-align: center; font-weight: 600; margin-bottom: 25px;"></p>
         
-        <button class="btn-primary" onclick="restartStudy()"><i class="fas fa-redo"></i> Repetir mismo modo</button>
+        <button class="btn-primary" onclick="restartStudy()"><i class="fas fa-redo"></i> Repetir cuestionario</button>
         <button class="btn-outline" onclick="location.reload()" style="margin-top: 10px;"><i class="fas fa-home"></i> Volver al menú</button>
     </div>
 
@@ -289,7 +267,6 @@
         let studyCards = [];
         let currentIndex = 0;
         let score = 0;
-        let currentMode = 'direct'; 
 
         window.onload = () => {
             updateSelectorUI();
@@ -454,7 +431,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE ESTUDIO
+        // LÓGICA DE ESTUDIO DIRECTO E INTELIGENTE
         // ==========================================
         function shuffleArray(array) {
             let newArray = [...array];
@@ -465,7 +442,7 @@
             return newArray;
         }
 
-        function startStudy(mode) {
+        function startStudy() {
             if (flashcards.length === 0) {
                 alert("Agrega preguntas a este cuestionario primero.");
                 return;
@@ -477,8 +454,6 @@
                 return;
             }
 
-            currentMode = mode;
-            
             const wantsShuffle = document.getElementById('shuffle-checkbox').checked;
             if (wantsShuffle) {
                 studyCards = shuffleArray(flashcards);
@@ -502,89 +477,85 @@
             document.getElementById('display-question').innerText = studyCards[currentIndex].question;
             
             const txtInput = document.getElementById('user-answer');
-            const chkBtn = document.getElementById('check-btn');
-            const mcContainer = document.getElementById('multiple-choice-container');
-
-            if (currentMode === 'direct') {
-                mcContainer.classList.add('hidden');
-                txtInput.classList.remove('hidden');
-                chkBtn.classList.remove('hidden');
-                txtInput.value = '';
-                txtInput.disabled = false;
-                txtInput.focus();
-            } else {
-                txtInput.classList.add('hidden');
-                chkBtn.classList.add('hidden');
-                mcContainer.classList.remove('hidden');
-                generateSmartOptions(studyCards[currentIndex].answer);
-            }
+            document.getElementById('check-btn').classList.remove('hidden');
+            
+            txtInput.value = '';
+            txtInput.disabled = false;
+            txtInput.focus();
         }
 
-        function generateSmartOptions(correctAnswer) {
-            let options = [correctAnswer];
-            let ansStr = correctAnswer.trim();
-            let lower = ansStr.toLowerCase();
-            
-            let d1 = ansStr;
-            if (lower.includes("siempre")) d1 = d1.replace(/siempre/ig, "nunca");
-            else if (lower.includes("nunca")) d1 = d1.replace(/nunca/ig, "siempre");
-            else if (lower.includes("aumentar")) d1 = d1.replace(/aumentar/ig, "disminuir");
-            else if (lower.includes("disminuir")) d1 = d1.replace(/disminuir/ig, "aumentar");
-            else if (lower.match(/^no /i)) d1 = ansStr.substring(3);
-            else d1 = "No " + ansStr.charAt(0).toLowerCase() + ansStr.slice(1);
-            
-            let d2 = ansStr + ", pero solo si es estrictamente necesario.";
-            
-            let d3 = "Ignorar y proceder con precaución.";
-            if (ansStr.length > 5) {
-                d3 = "Evitar " + ansStr.charAt(0).toLowerCase() + ansStr.slice(1);
-            }
-            
-            options.push(d1, d2, d3);
-            options = shuffleArray(options); 
-            
-            const container = document.getElementById('multiple-choice-container');
-            container.innerHTML = '';
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'mc-option';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(opt, btn);
-                container.appendChild(btn);
-            });
-        }
-
-        function checkAnswer(selectedAnswer = null, btnElement = null) {
-            let userAnswer = (currentMode === 'direct') ? document.getElementById('user-answer').value.trim().toLowerCase() : selectedAnswer.trim().toLowerCase();
-            const correctAnswerText = studyCards[currentIndex].answer;
-            const correctAnswer = correctAnswerText.trim().toLowerCase();
+        function checkAnswer() {
+            const userAnswer = document.getElementById('user-answer').value.trim();
+            const correctAnswer = studyCards[currentIndex].answer.trim();
             const feedback = document.getElementById('feedback');
 
-            if (userAnswer === correctAnswer) {
-                feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Correcto!';
-                feedback.className = "feedback correct";
-                score++;
-                if (btnElement) btnElement.classList.add('correct-btn');
+            if (userAnswer === "") {
+                alert("Por favor escribe una respuesta.");
+                return;
+            }
+
+            // FUNCIÓN DE LIMPIEZA DE TEXTOS (IGNORA TILDES, MAYÚSCULAS Y PUNTUACIÓN)
+            const normalize = (str) => {
+                return str.toLowerCase()
+                          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
+                          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ") // quita puntuación
+                          .replace(/\s+/g, " ") // quita espacios extra
+                          .trim();
+            };
+
+            const normUser = normalize(userAnswer);
+            const normCorrect = normalize(correctAnswer);
+
+            let isCorrect = false;
+            let isFuzzy = false;
+
+            // Comparación 1: Exacta (después de limpiar mayúsculas y acentos)
+            if (normUser === normCorrect) {
+                isCorrect = true;
             } else {
-                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#64748b;">La respuesta era: <b>${correctAnswerText}</b></span>`;
-                feedback.className = "feedback incorrect";
-                if (btnElement) {
-                    btnElement.classList.add('wrong-btn');
-                    document.querySelectorAll('.mc-option').forEach(b => {
-                        if(b.innerText.trim().toLowerCase() === correctAnswer) b.classList.add('correct-btn');
+                // Comparación 2: Inteligente por Palabras Clave
+                // Filtramos conectores y palabras comunes
+                const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'de', 'del', 'al', 'con', 'por', 'para', 'en', 'a', 'es', 'son', 'se', 'lo', 'que', 'como', 'su', 'sus'];
+                
+                const cWords = normCorrect.split(' ').filter(w => !stopWords.includes(w) && w.length > 2);
+                
+                if (cWords.length > 0) {
+                    let matches = 0;
+                    cWords.forEach(cw => {
+                        if (normUser.includes(cw)) matches++;
                     });
+                    
+                    // Si el 70% o más de las palabras clave están presentes
+                    if ((matches / cWords.length) >= 0.7) {
+                        isCorrect = true;
+                        isFuzzy = true;
+                    }
+                } else {
+                    // Si la respuesta correcta es muy corta, evaluamos si está contenida
+                    if (normUser.includes(normCorrect)) {
+                        isCorrect = true;
+                        isFuzzy = true;
+                    }
                 }
+            }
+
+            // Mostrar el resultado
+            if (isCorrect) {
+                score++;
+                if (isFuzzy) {
+                    feedback.innerHTML = `<i class="fas fa-check-double"></i> ¡Bien! Lo detecté como correcto.<br><span style="font-size:14px; font-weight:normal; color:#16a34a; display:block; margin-top:5px;">La respuesta exacta era: <b>${correctAnswer}</b></span>`;
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Exacto, respuesta perfecta!';
+                }
+                feedback.className = "feedback correct";
+            } else {
+                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#64748b; display:block; margin-top:5px;">La respuesta correcta es: <b>${correctAnswer}</b></span>`;
+                feedback.className = "feedback incorrect";
             }
             
             document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
-            
-            if (currentMode === 'direct') {
-                document.getElementById('user-answer').disabled = true;
-                document.getElementById('check-btn').classList.add('hidden');
-            } else {
-                document.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
-            }
-            
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('check-btn').classList.add('hidden');
             document.getElementById('next-btn').classList.remove('hidden');
         }
 
@@ -610,7 +581,7 @@
             else message.innerText = "Sigue practicando, la repetición es la clave del éxito.";
         }
 
-        function restartStudy() { startStudy(currentMode); }
+        function restartStudy() { startStudy(); }
     </script>
 </body>
 </html>
