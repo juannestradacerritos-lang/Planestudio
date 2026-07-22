@@ -406,28 +406,84 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('portrait', 'mm', 'a4'); 
             
-            doc.setFontSize(18);
-            doc.setTextColor(37, 99, 235);
-            doc.text(`Plan de Estudio: ${currentQuizName}`, 14, 20);
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+
+            // --- 1. ENCABEZADO CORPORATIVO ---
+            doc.setFillColor(15, 23, 42); 
+            doc.rect(0, 0, pageWidth, 25, 'F');
             
-            doc.setFontSize(11);
-            doc.setTextColor(100, 116, 139);
+            doc.setTextColor(255, 255, 255); 
+            doc.setFontSize(22);
+            doc.setFont("helvetica", "bold");
+            doc.text("Guía de Preparación", 15, 17);
+
+            // --- 2. INFORMACIÓN DEL CUESTIONARIO ---
+            doc.setTextColor(51, 65, 85); 
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Tema: ${currentQuizName}`, 15, 36);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
             const date = new Date().toLocaleDateString();
-            doc.text(`Generado el: ${date} - Total de preguntas: ${flashcards.length}`, 14, 28);
+            doc.text(`Generado el: ${date}   |   Total de preguntas: ${flashcards.length}`, 15, 43);
             
-            const tableData = flashcards.map((fc, i) => [i + 1, fc.question, fc.answer]);
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.5);
+            doc.line(15, 47, pageWidth - 15, 47);
+
+            // --- 3. PREPARAR DATOS ---
+            const tableData = flashcards.map((fc, i) => [
+                i + 1, 
+                fc.question, 
+                fc.answer !== "" ? fc.answer : "______________________________________"
+            ]);
             
+            // --- 4. TABLA ---
             doc.autoTable({
-                startY: 35,
-                head: [['#', 'Pregunta', 'Respuesta Correcta']],
+                startY: 53,
+                head: [['Nº', 'Pregunta', 'Respuesta Correcta']],
                 body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [220, 38, 38] },
-                styles: { fontSize: 11, cellPadding: 5, overflow: 'linebreak' },
-                columnStyles: { 0: { cellWidth: 10, halign: 'center' }, 1: { cellWidth: 85 }, 2: { cellWidth: 85 } },
-                margin: { top: 30, right: 15, bottom: 20, left: 15 }
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [220, 38, 38],
+                    textColor: 255, 
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    valign: 'middle'
+                },
+                bodyStyles: {
+                    textColor: [30, 41, 59],
+                    fontSize: 10,
+                    valign: 'middle',
+                    lineColor: [226, 232, 240]
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                columnStyles: { 
+                    0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' }, 
+                    1: { cellWidth: 85, fontStyle: 'bold' },
+                    2: { cellWidth: 83 } 
+                },
+                margin: { left: 15, right: 15, bottom: 20 },
+                
+                // --- 5. PIE DE PÁGINA ---
+                didDrawPage: function (data) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(148, 163, 184); 
+                    doc.text(
+                        `Página ${doc.internal.getNumberOfPages()}`, 
+                        pageWidth - 15, 
+                        pageHeight - 10, 
+                        { align: 'right' }
+                    );
+                }
             });
-            doc.save(currentQuizName.replace(/\s+/g, '_') + '.pdf');
+            
+            let filename = currentQuizName.replace(/\s+/g, '_') + '_Ascenso.pdf';
+            doc.save(filename);
         }
 
         // ==========================================
@@ -494,12 +550,12 @@
                 return;
             }
 
-            // FUNCIÓN DE LIMPIEZA DE TEXTOS (IGNORA TILDES, MAYÚSCULAS Y PUNTUACIÓN)
+            // FUNCIÓN DE LIMPIEZA DE TEXTOS
             const normalize = (str) => {
                 return str.toLowerCase()
-                          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
-                          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ") // quita puntuación
-                          .replace(/\s+/g, " ") // quita espacios extra
+                          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ") 
+                          .replace(/\s+/g, " ") 
                           .trim();
             };
 
@@ -509,12 +565,9 @@
             let isCorrect = false;
             let isFuzzy = false;
 
-            // Comparación 1: Exacta (después de limpiar mayúsculas y acentos)
             if (normUser === normCorrect) {
                 isCorrect = true;
             } else {
-                // Comparación 2: Inteligente por Palabras Clave
-                // Filtramos conectores y palabras comunes
                 const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'de', 'del', 'al', 'con', 'por', 'para', 'en', 'a', 'es', 'son', 'se', 'lo', 'que', 'como', 'su', 'sus'];
                 
                 const cWords = normCorrect.split(' ').filter(w => !stopWords.includes(w) && w.length > 2);
@@ -525,13 +578,11 @@
                         if (normUser.includes(cw)) matches++;
                     });
                     
-                    // Si el 70% o más de las palabras clave están presentes
                     if ((matches / cWords.length) >= 0.7) {
                         isCorrect = true;
                         isFuzzy = true;
                     }
                 } else {
-                    // Si la respuesta correcta es muy corta, evaluamos si está contenida
                     if (normUser.includes(normCorrect)) {
                         isCorrect = true;
                         isFuzzy = true;
@@ -539,7 +590,6 @@
                 }
             }
 
-            // Mostrar el resultado
             if (isCorrect) {
                 score++;
                 if (isFuzzy) {
