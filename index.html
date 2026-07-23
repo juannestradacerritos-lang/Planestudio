@@ -67,7 +67,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
         }
-        h2 { text-align: center; margin-top: 0; color: var(--primary); font-size: 26px; }
+        h2 { text-align: center; margin-top: 5px; margin-bottom: 20px; color: var(--primary); font-size: 26px; }
         .input-group { margin-bottom: 15px; }
         label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
         
@@ -83,7 +83,7 @@
         button {
             width: 100%; padding: 14px; margin-top: 5px;
             border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
+            cursor: pointer; transition: all 0.2s; box-sizing: border-box;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         button:active { transform: scale(0.98); }
@@ -95,7 +95,17 @@
         .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); }
         .hidden { display: none !important; }
         
-        /* Lista ampliable */
+        /* Botones MICRO para respaldos (Arriba Izquierda) */
+        .btn-micro {
+            width: auto; padding: 6px 10px; margin: 0;
+            background-color: #64748b; color: white;
+            border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-micro:hover { background-color: #475569; }
+        .btn-micro:active { transform: scale(0.95); }
+        
         .questions-list-container {
             height: 280px; min-height: 150px; resize: vertical; overflow-y: auto;
             margin-top: 15px; border: 1px solid #e2e8f0;
@@ -148,6 +158,17 @@
         <div class="install-banner" id="install-banner">
             <i class="fas fa-download"></i> Instalar como Aplicación
         </div>
+
+        <!-- Botones de Respaldo Arriba a la Izquierda -->
+        <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 5px;">
+            <button class="btn-micro" onclick="downloadBackup()" title="Descargar copia">
+                <i class="fas fa-download"></i> Guardar
+            </button>
+            <label class="btn-micro" title="Cargar copia guardada">
+                <i class="fas fa-upload"></i> Cargar
+                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importBackup(event)">
+            </label>
+        </div>
         
         <h2>📕 Plan de estudio</h2>
 
@@ -181,7 +202,6 @@
             <div id="questions-list"></div>
         </div>
         
-        <!-- Opciones de Estudio Mejoradas -->
         <div style="margin-top: 20px;">
             <div class="checkbox-container">
                 <input type="checkbox" id="shuffle-checkbox"> 
@@ -398,6 +418,44 @@
             });
         }
 
+        function downloadBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            const dateStr = new Date().toISOString().split('T')[0];
+            downloadAnchorNode.setAttribute("download", `Respaldo_Cuestionarios_${dateStr}.json`);
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData && typeof importedData === 'object') {
+                        if(confirm("¿Estás seguro de cargar este respaldo? Reemplazará los cuestionarios actuales que tengas sin guardar.")) {
+                            allData = importedData;
+                            localStorage.setItem('misCuestionarios', JSON.stringify(allData));
+                            currentQuizName = Object.keys(allData)[0] || "Cuestionario Base";
+                            flashcards = allData[currentQuizName] || [];
+                            updateSelectorUI();
+                            updateListUI();
+                            alert("¡Respaldo cargado correctamente!");
+                        }
+                    }
+                } catch (err) {
+                    alert("El archivo seleccionado no es un respaldo válido.");
+                }
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
+        }
+
         function exportPDF() {
             if (flashcards.length === 0) {
                 alert("Agrega al menos una pregunta antes de exportar.");
@@ -409,43 +467,44 @@
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
 
-            // --- 1. ENCABEZADO CORPORATIVO ---
             doc.setFillColor(15, 23, 42); 
-            doc.rect(0, 0, pageWidth, 25, 'F');
+            doc.rect(0, 0, pageWidth, 18, 'F'); 
             
             doc.setTextColor(255, 255, 255); 
-            doc.setFontSize(22);
+            doc.setFontSize(14); 
             doc.setFont("helvetica", "bold");
-            doc.text("Guía de Preparación", 15, 17);
+            doc.text("Guía de Preparación", 15, 11);
 
-            // --- 2. INFORMACIÓN DEL CUESTIONARIO ---
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            const date = new Date().toLocaleDateString();
+            doc.text(`Fecha: ${date}`, pageWidth - 15, 11, { align: 'right' });
+
             doc.setTextColor(51, 65, 85); 
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setFont("helvetica", "bold");
-            doc.text(`Tema: ${currentQuizName}`, 15, 36);
+            doc.text(`Tema: ${currentQuizName}`, 15, 26);
             
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            const date = new Date().toLocaleDateString();
-            doc.text(`Generado el: ${date}   |   Total de preguntas: ${flashcards.length}`, 15, 43);
+            doc.text(`Total de preguntas: ${flashcards.length}`, 15, 31);
             
             doc.setDrawColor(226, 232, 240);
             doc.setLineWidth(0.5);
-            doc.line(15, 47, pageWidth - 15, 47);
+            doc.line(15, 34, pageWidth - 15, 34);
 
-            // --- 3. PREPARAR DATOS ---
             const tableData = flashcards.map((fc, i) => [
                 i + 1, 
                 fc.question, 
                 fc.answer !== "" ? fc.answer : "______________________________________"
             ]);
             
-            // --- 4. TABLA ---
             doc.autoTable({
-                startY: 53,
+                startY: 38,
                 head: [['Nº', 'Pregunta', 'Respuesta Correcta']],
                 body: tableData,
                 theme: 'grid',
+                rowPageBreak: 'avoid', 
                 headStyles: { 
                     fillColor: [220, 38, 38],
                     textColor: 255, 
@@ -469,7 +528,6 @@
                 },
                 margin: { left: 15, right: 15, bottom: 20 },
                 
-                // --- 5. PIE DE PÁGINA ---
                 didDrawPage: function (data) {
                     doc.setFontSize(9);
                     doc.setTextColor(148, 163, 184); 
@@ -550,7 +608,6 @@
                 return;
             }
 
-            // FUNCIÓN DE LIMPIEZA DE TEXTOS
             const normalize = (str) => {
                 return str.toLowerCase()
                           .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
