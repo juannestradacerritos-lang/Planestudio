@@ -42,6 +42,8 @@
             --danger: #dc2626;
             --warning: #f59e0b;
             --info: #3b82f6;
+            --purple: #8b5cf6;
+            --purple-hover: #7c3aed;
             --background: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -71,31 +73,36 @@
         .input-group { margin-bottom: 15px; }
         label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
         
-        textarea, select {
+        textarea, select, input[type="text"] {
             width: 100%; padding: 12px; box-sizing: border-box;
             border: 1px solid #e2e8f0; border-radius: 8px;
             font-size: 15px; transition: border-color 0.2s;
             background-color: #f8fafc; font-family: inherit;
         }
         textarea { resize: vertical; min-height: 60px; }
-        textarea:focus, select:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         
-        button {
+        button, .btn-label {
             width: 100%; padding: 14px; margin-top: 5px;
             border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
             cursor: pointer; transition: all 0.2s; box-sizing: border-box;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        button:active { transform: scale(0.98); }
+        button:active, .btn-label:active { transform: scale(0.98); }
         button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-success { background-color: var(--success); color: white; margin-top: 10px;}
         .btn-pdf { background-color: var(--danger); color: white; margin-top: 10px; }
-        .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); }
+        .btn-override { background-color: var(--purple); color: white; margin-top: 10px; }
+        .btn-override:hover { background-color: var(--purple-hover); }
+        .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); margin-top: 10px;}
+        
+        .btn-backup { background-color: #475569; color: white; margin-top: 10px; }
+        .btn-backup:hover { background-color: #334155; }
+        
         .hidden { display: none !important; }
         
-        /* Botones MICRO para respaldos (Arriba Izquierda) */
         .btn-micro {
             width: auto; padding: 6px 10px; margin: 0;
             background-color: #64748b; color: white;
@@ -106,16 +113,28 @@
         .btn-micro:hover { background-color: #475569; }
         .btn-micro:active { transform: scale(0.95); }
         
+        .search-box {
+            position: relative; margin-bottom: 10px;
+        }
+        .search-box i {
+            position: absolute; left: 12px; top: 14px; color: #94a3b8;
+        }
+        .search-box input {
+            padding-left: 35px; background-color: #fff; border-color: #cbd5e1;
+        }
+
         .questions-list-container {
             height: 280px; min-height: 150px; resize: vertical; overflow-y: auto;
-            margin-top: 15px; border: 1px solid #e2e8f0;
+            border: 1px solid #e2e8f0;
             border-radius: 8px; padding: 10px; background: #f8fafc;
         }
         .question-item {
             background: white; padding: 12px; margin-bottom: 8px;
             border-radius: 6px; border: 1px solid #e2e8f0;
             display: flex; flex-direction: column; gap: 10px;
+            transition: all 0.2s;
         }
+        .question-item.editing { border-color: var(--warning); background-color: #fffbeb; }
         .question-item-text { font-size: 13px; color: #334155; }
         .question-item-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; }
         .action-btns { display: flex; gap: 5px; }
@@ -123,6 +142,7 @@
         .btn-edit { background-color: var(--warning); }
         .btn-delete { background-color: var(--danger); }
         .btn-move { background-color: var(--info); }
+        .btn-icon:disabled { opacity: 0.3; background-color: #cbd5e1; }
         
         .no-answer { color: var(--danger); font-style: italic; font-weight: 500; }
 
@@ -159,13 +179,12 @@
             <i class="fas fa-download"></i> Instalar como Aplicación
         </div>
 
-        <!-- Botones de Respaldo Arriba a la Izquierda -->
         <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 5px;">
             <button class="btn-micro" onclick="downloadBackup()" title="Descargar copia">
-                <i class="fas fa-download"></i> Guardar
+                <i class="fas fa-download"></i> Guardar Respaldo
             </button>
             <label class="btn-micro" title="Cargar copia guardada">
-                <i class="fas fa-upload"></i> Cargar
+                <i class="fas fa-upload"></i> Cargar Respaldo
                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importBackup(event)">
             </label>
         </div>
@@ -176,7 +195,7 @@
             <label>Tema / Cuestionario actual</label>
             <div style="display: flex; gap: 8px;">
                 <select id="quiz-selector" onchange="changeQuiz()"></select>
-                <button class="btn-outline" style="width: auto; padding: 0 15px; margin: 0;" onclick="createNewQuiz()" title="Crear nuevo cuestionario">
+                <button class="btn-outline" style="width: auto; padding: 0 15px; margin: 0; margin-top:0;" onclick="createNewQuiz()" title="Crear nuevo cuestionario">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
@@ -191,14 +210,24 @@
             <textarea id="answer-input" rows="2" placeholder="Puedes dejarla en blanco y llenarla después..."></textarea>
         </div>
         
-        <button class="btn-primary" onclick="addQuestion()" style="margin-bottom: 15px;">
+        <button id="save-btn" class="btn-primary" onclick="addQuestion()" style="margin-bottom: 5px;">
             <i class="fas fa-save"></i> Guardar Pregunta
         </button>
+        <button id="cancel-edit-btn" class="btn-outline hidden" onclick="cancelEdit()" style="margin-bottom: 15px; margin-top:5px;">
+            <i class="fas fa-times"></i> Cancelar Edición
+        </button>
         
+        <div style="margin-top: 25px; margin-bottom: 10px; display:flex; justify-content: space-between; align-items:center;">
+            <label style="margin:0;">Lista de Preguntas (<span id="count" style="color: var(--primary);">0</span>)</label>
+        </div>
+
+        <!-- BUSCADOR -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Buscar pregunta o respuesta..." oninput="updateListUI()">
+        </div>
+
         <div class="questions-list-container" id="list-container">
-            <div style="font-size: 13px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">
-                Preguntas en esta lista: <span id="count" style="color: var(--primary);">0</span>
-            </div>
             <div id="questions-list"></div>
         </div>
         
@@ -230,6 +259,11 @@
         
         <p id="feedback" class="feedback"></p>
         
+        <!-- NUEVO: Botón para forzar respuesta correcta -->
+        <button class="btn-override hidden" id="override-btn" onclick="overrideCorrect()">
+            <i class="fas fa-balance-scale"></i> Mi respuesta es correcta (Forzar acierto)
+        </button>
+
         <button class="btn-primary" id="check-btn" onclick="checkAnswer()">Comprobar Respuesta</button>
         <button class="btn-success hidden" id="next-btn" onclick="nextQuestion()">Siguiente <i class="fas fa-arrow-right"></i></button>
         <button class="btn-outline" style="margin-top: 15px;" onclick="location.reload()">Abandonar estudio</button>
@@ -287,6 +321,7 @@
         let studyCards = [];
         let currentIndex = 0;
         let score = 0;
+        let editingIndex = -1; 
 
         window.onload = () => {
             updateSelectorUI();
@@ -329,6 +364,7 @@
         function changeQuiz() {
             currentQuizName = document.getElementById('quiz-selector').value;
             flashcards = allData[currentQuizName];
+            cancelEdit(); 
             updateListUI();
         }
 
@@ -336,33 +372,70 @@
             const q = document.getElementById('question-input').value.trim();
             const a = document.getElementById('answer-input').value.trim();
             
-            if (q) {
+            if (!q) {
+                alert("Debes escribir al menos la pregunta.");
+                return;
+            }
+
+            const isDuplicate = flashcards.some((fc, idx) => {
+                return idx !== editingIndex && fc.question.trim().toLowerCase() === q.toLowerCase();
+            });
+
+            if (isDuplicate) {
+                const conf = confirm("¡Aviso! Ya existe una pregunta idéntica en este cuestionario. ¿Deseas guardarla de todos modos?");
+                if (!conf) return; 
+            }
+
+            if (editingIndex > -1) {
+                flashcards[editingIndex] = { question: q, answer: a };
+                cancelEdit(); 
+            } else {
                 flashcards.push({ question: q, answer: a });
-                saveData();
                 document.getElementById('question-input').value = '';
                 document.getElementById('answer-input').value = '';
                 document.getElementById('question-input').focus();
-                updateListUI();
-            } else {
-                alert("Debes escribir al menos la pregunta.");
             }
+
+            saveData();
+            updateListUI();
+        }
+
+        function editQuestion(index) {
+            editingIndex = index;
+            document.getElementById('question-input').value = flashcards[index].question;
+            document.getElementById('answer-input').value = flashcards[index].answer;
+            
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar Pregunta';
+            saveBtn.style.backgroundColor = 'var(--warning)';
+            
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            
+            updateListUI();
+            document.getElementById('question-input').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            document.getElementById('question-input').value = '';
+            document.getElementById('answer-input').value = '';
+            
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Pregunta';
+            saveBtn.style.backgroundColor = 'var(--primary)';
+            
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            updateListUI();
         }
 
         function deleteQuestion(index) {
             if (confirm("¿Estás seguro de borrar esta pregunta?")) {
+                if (editingIndex === index) cancelEdit();
                 flashcards.splice(index, 1);
                 saveData();
                 updateListUI();
             }
-        }
-
-        function editQuestion(index) {
-            document.getElementById('question-input').value = flashcards[index].question;
-            document.getElementById('answer-input').value = flashcards[index].answer;
-            flashcards.splice(index, 1);
-            saveData();
-            updateListUI();
-            document.getElementById('question-input').focus();
         }
 
         function moveUp(index) {
@@ -370,6 +443,10 @@
                 let temp = flashcards[index];
                 flashcards[index] = flashcards[index - 1];
                 flashcards[index - 1] = temp;
+                
+                if (editingIndex === index) editingIndex = index - 1;
+                else if (editingIndex === index - 1) editingIndex = index;
+
                 saveData();
                 updateListUI();
             }
@@ -380,6 +457,10 @@
                 let temp = flashcards[index];
                 flashcards[index] = flashcards[index + 1];
                 flashcards[index + 1] = temp;
+                
+                if (editingIndex === index) editingIndex = index + 1;
+                else if (editingIndex === index + 1) editingIndex = index;
+
                 saveData();
                 updateListUI();
             }
@@ -387,26 +468,48 @@
 
         function updateListUI() {
             const listEl = document.getElementById('questions-list');
-            listEl.innerHTML = '';
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
             document.getElementById('count').innerText = flashcards.length;
+            listEl.innerHTML = '';
 
             if (flashcards.length === 0) {
                 listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; margin-top:20px;">No hay preguntas aquí.</div>';
                 return;
             }
 
-            flashcards.forEach((item, index) => {
+            let displayCards = flashcards.map((item, originalIndex) => ({ item, originalIndex }));
+
+            if (searchTerm) {
+                displayCards = displayCards.filter(obj => 
+                    obj.item.question.toLowerCase().includes(searchTerm) || 
+                    obj.item.answer.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (displayCards.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; margin-top:20px;">No se encontraron coincidencias para tu búsqueda.</div>';
+                return;
+            }
+
+            displayCards.forEach((obj) => {
+                const item = obj.item;
+                const index = obj.originalIndex;
                 let answerDisplay = item.answer !== "" ? item.answer : '<span class="no-answer">(Sin respuesta aún)</span>';
+                
+                const isEditingClass = (index === editingIndex) ? 'editing' : '';
+                const disableMove = searchTerm ? 'disabled' : '';
+
                 listEl.innerHTML += `
-                    <div class="question-item">
+                    <div class="question-item ${isEditingClass}">
                         <div class="question-item-text">
                             <strong>${index + 1}. P:</strong> ${item.question}<br>
                             <strong>R:</strong> ${answerDisplay}
                         </div>
                         <div class="question-item-actions">
                             <div class="action-btns">
-                                <button onclick="moveUp(${index})" class="btn-icon btn-move" title="Mover arriba"><i class="fas fa-arrow-up"></i></button>
-                                <button onclick="moveDown(${index})" class="btn-icon btn-move" title="Mover abajo"><i class="fas fa-arrow-down"></i></button>
+                                <button onclick="moveUp(${index})" class="btn-icon btn-move" title="Mover arriba" ${disableMove}><i class="fas fa-arrow-up"></i></button>
+                                <button onclick="moveDown(${index})" class="btn-icon btn-move" title="Mover abajo" ${disableMove}><i class="fas fa-arrow-down"></i></button>
                             </div>
                             <div class="action-btns">
                                 <button onclick="editQuestion(${index})" class="btn-icon btn-edit" title="Modificar"><i class="fas fa-edit"></i></button>
@@ -418,6 +521,9 @@
             });
         }
 
+        // ==========================================
+        // RESPALDOS Y EXPORTACIONES
+        // ==========================================
         function downloadBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
             const downloadAnchorNode = document.createElement('a');
@@ -443,6 +549,7 @@
                             localStorage.setItem('misCuestionarios', JSON.stringify(allData));
                             currentQuizName = Object.keys(allData)[0] || "Cuestionario Base";
                             flashcards = allData[currentQuizName] || [];
+                            cancelEdit();
                             updateSelectorUI();
                             updateListUI();
                             alert("¡Respaldo cargado correctamente!");
@@ -545,7 +652,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE ESTUDIO DIRECTO E INTELIGENTE
+        // LÓGICA DE ESTUDIO
         // ==========================================
         function shuffleArray(array) {
             let newArray = [...array];
@@ -586,6 +693,8 @@
         function showQuestion() {
             document.getElementById('feedback').innerText = '';
             document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('override-btn').classList.add('hidden');
+            
             document.getElementById('question-counter').innerHTML = `<i class="fas fa-list-ol"></i> ${currentIndex + 1}/${studyCards.length}`;
             document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
             document.getElementById('display-question').innerText = studyCards[currentIndex].question;
@@ -655,15 +764,31 @@
                     feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Exacto, respuesta perfecta!';
                 }
                 feedback.className = "feedback correct";
+                document.getElementById('override-btn').classList.add('hidden');
             } else {
                 feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#64748b; display:block; margin-top:5px;">La respuesta correcta es: <b>${correctAnswer}</b></span>`;
                 feedback.className = "feedback incorrect";
+                
+                // Mostrar botón para forzar acierto si el usuario considera que sí estaba bien
+                document.getElementById('override-btn').classList.remove('hidden');
             }
             
             document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
             document.getElementById('user-answer').disabled = true;
             document.getElementById('check-btn').classList.add('hidden');
             document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // NUEVO: Función para anular la calificación incorrecta del sistema
+        function overrideCorrect() {
+            score++;
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Validada como correcta manualmente!';
+            feedback.className = "feedback correct";
+            
+            document.getElementById('override-btn').classList.add('hidden');
         }
 
         function nextQuestion() {
