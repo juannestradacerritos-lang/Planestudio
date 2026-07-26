@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuestionario</title>
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#3b82f6">
     
     <!-- jsPDF para Exportar a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
     <!-- Iconos de FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script>
         // TRUCO PWA EN UN SOLO ARCHIVO
@@ -20,8 +20,8 @@
             short_name: "Cuestionario",
             start_url: window.location.href,
             display: "standalone",
-            background_color: "#f1f5f9",
-            theme_color: "#2563eb",
+            background_color: "#f0f9ff",
+            theme_color: "#3b82f6",
             icons: [{
                 src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📕</text></svg>",
                 sizes: "512x512",
@@ -35,139 +35,163 @@
     </script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success: #16a34a;
-            --danger: #dc2626;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
             --warning: #f59e0b;
-            --info: #3b82f6;
+            --info: #0ea5e9;
             --purple: #8b5cf6;
             --purple-hover: #7c3aed;
-            --background: #f1f5f9;
+            --background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
+            --border-light: #e2e8f0;
         }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: var(--background);
+            background: var(--background);
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
+
         .container {
             width: 100%;
             max-width: 550px;
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
-        h2 { text-align: center; margin-top: 5px; margin-bottom: 20px; color: var(--primary); font-size: 26px; }
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; display: block; }
+
+        h2 { text-align: center; margin-top: 0; margin-bottom: 25px; color: var(--text-main); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        
+        .input-group { margin-bottom: 18px; }
+        label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px;}
         
         textarea, select, input[type="text"] {
-            width: 100%; padding: 12px; box-sizing: border-box;
-            border: 1px solid #e2e8f0; border-radius: 8px;
-            font-size: 15px; transition: border-color 0.2s;
-            background-color: #f8fafc; font-family: inherit;
+            width: 100%; padding: 14px; box-sizing: border-box;
+            border: 2px solid var(--border-light); border-radius: 10px;
+            font-size: 15px; transition: all 0.2s;
+            background-color: #f8fafc; font-family: inherit; color: var(--text-main);
         }
         textarea { resize: vertical; min-height: 60px; }
-        textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); }
         
         button, .btn-label {
-            width: 100%; padding: 14px; margin-top: 5px;
-            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            width: 100%; padding: 15px; margin-top: 5px;
+            border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
             cursor: pointer; transition: all 0.2s; box-sizing: border-box;
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        button:active, .btn-label:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-success { background-color: var(--success); color: white; margin-top: 10px;}
-        .btn-pdf { background-color: var(--danger); color: white; margin-top: 10px; }
-        .btn-override { background-color: var(--purple); color: white; margin-top: 10px; }
-        .btn-override:hover { background-color: var(--purple-hover); }
-        .btn-outline { background-color: transparent; border: 2px solid #cbd5e1; color: var(--text-muted); margin-top: 10px;}
+        button:active, .btn-label:active { transform: translateY(2px); box-shadow: none; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         
-        .btn-backup { background-color: #475569; color: white; margin-top: 10px; }
-        .btn-backup:hover { background-color: #334155; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2); }
+        .btn-success { background-color: var(--success); color: white; margin-top: 15px;}
+        .btn-pdf { background-color: #1e293b; color: white; margin-top: 12px; }
+        .btn-pdf:hover { background-color: #0f172a; }
+        .btn-override { background-color: var(--purple); color: white; margin-top: 15px; }
+        .btn-override:hover { background-color: var(--purple-hover); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--border-light); color: var(--text-muted); margin-top: 12px; box-shadow: none;}
+        .btn-outline:hover { border-color: var(--text-muted); color: var(--text-main); }
+        
+        .btn-micro {
+            width: auto; padding: 8px 12px; margin: 0;
+            background-color: #f1f5f9; color: var(--text-muted);
+            border: 1px solid var(--border-light); border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; box-shadow: none;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-micro:hover { background-color: #e2e8f0; color: var(--text-main); }
         
         .hidden { display: none !important; }
         
-        .btn-micro {
-            width: auto; padding: 6px 10px; margin: 0;
-            background-color: #64748b; color: white;
-            border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .btn-micro:hover { background-color: #475569; }
-        .btn-micro:active { transform: scale(0.95); }
-        
-        .search-box {
-            position: relative; margin-bottom: 10px;
-        }
-        .search-box i {
-            position: absolute; left: 12px; top: 14px; color: #94a3b8;
-        }
-        .search-box input {
-            padding-left: 35px; background-color: #fff; border-color: #cbd5e1;
-        }
+        .search-box { position: relative; margin-bottom: 12px; }
+        .search-box i { position: absolute; left: 14px; top: 16px; color: #94a3b8; }
+        .search-box input { padding-left: 40px; background-color: #fff; }
 
         .questions-list-container {
-            height: 280px; min-height: 150px; resize: vertical; overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px; padding: 10px; background: #f8fafc;
+            height: 300px; min-height: 150px; resize: vertical; overflow-y: auto;
+            border: 2px solid var(--border-light); border-radius: 12px; padding: 12px; background: #f8fafc;
         }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
         .question-item {
-            background: white; padding: 12px; margin-bottom: 8px;
-            border-radius: 6px; border: 1px solid #e2e8f0;
-            display: flex; flex-direction: column; gap: 10px;
-            transition: all 0.2s;
+            background: white; padding: 15px; margin-bottom: 10px;
+            border-radius: 10px; border: 1px solid var(--border-light);
+            display: flex; flex-direction: column; gap: 12px;
+            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .question-item.editing { border-color: var(--warning); background-color: #fffbeb; }
-        .question-item-text { font-size: 13px; color: #334155; }
-        .question-item-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; }
-        .action-btns { display: flex; gap: 5px; }
-        .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0; color: white; font-size: 12px;}
+        .question-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
+        .question-item.editing { border-color: var(--warning); background-color: #fffbeb; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
+        .question-item-text { font-size: 14px; color: var(--text-main); line-height: 1.5; }
+        .question-item-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-light); padding-top: 10px; }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .btn-icon { width: 34px; height: 34px; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0; color: white; font-size: 13px; box-shadow: none;}
         .btn-edit { background-color: var(--warning); }
         .btn-delete { background-color: var(--danger); }
         .btn-move { background-color: var(--info); }
-        .btn-icon:disabled { opacity: 0.3; background-color: #cbd5e1; }
+        .btn-icon:disabled { opacity: 0.3; background-color: var(--border-light); }
         
-        .no-answer { color: var(--danger); font-style: italic; font-weight: 500; }
+        .no-answer { color: var(--danger); font-style: italic; font-weight: 500; font-size: 13px; }
 
         .stats-bar {
-            display: flex; justify-content: space-between; background: #f8fafc; padding: 12px;
-            border-radius: 8px; margin-bottom: 20px; font-weight: 600; font-size: 14px; border: 1px solid #e2e8f0;
+            display: flex; justify-content: space-between; background: #f8fafc; padding: 15px;
+            border-radius: 12px; margin-bottom: 25px; font-weight: 600; font-size: 14px; border: 2px solid var(--border-light);
+            color: var(--text-muted);
         }
         .question-box { 
-            background: #f8fafc; padding: 25px 20px; border-radius: 12px; 
-            text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: 600; border: 1px solid #e2e8f0;
+            background: #fff; padding: 30px 20px; border-radius: 12px; 
+            text-align: center; margin-bottom: 25px; font-size: 20px; font-weight: 600; border: 2px solid var(--border-light);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); color: var(--text-main); line-height: 1.4;
         }
         
-        .feedback { text-align: center; font-weight: bold; margin: 15px 0; font-size: 16px; min-height: 24px; line-height: 1.4; }
-        .correct { color: var(--success); }
-        .incorrect { color: var(--danger); }
+        .feedback { text-align: center; font-weight: 600; margin: 20px 0; font-size: 16px; min-height: 24px; line-height: 1.5; padding: 15px; border-radius: 10px;}
+        .correct { background-color: var(--success-light); color: #065f46; border: 1px solid #a7f3d0; }
+        .incorrect { background-color: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
         
         .install-banner { 
-            background: #0f172a; color: white; padding: 12px; 
-            border-radius: 8px; text-align: center; margin-bottom: 20px; 
+            background: linear-gradient(to right, #1e293b, #0f172a); color: white; padding: 14px; 
+            border-radius: 10px; text-align: center; margin-bottom: 25px; 
             cursor: pointer; display: none; font-weight: 600; font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
         .checkbox-container {
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 15px; font-size: 14px; font-weight: 600; color: var(--text-muted);
+            margin-top: 20px; font-size: 14px; font-weight: 600; color: var(--text-muted);
+            background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border-light);
+        }
+
+        /* Resumen de errores */
+        .mistakes-container {
+            margin-top: 20px; text-align: left;
+        }
+        .mistake-card {
+            background: #fff; border: 1px solid #fecaca; border-left: 4px solid var(--danger);
+            padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; line-height: 1.5;
         }
     </style>
 </head>
@@ -176,15 +200,15 @@
     <!-- MODO CREADOR -->
     <div class="container" id="setup-section">
         <div class="install-banner" id="install-banner">
-            <i class="fas fa-download"></i> Instalar como Aplicación
+            <i class="fas fa-download"></i> Instalar como Aplicación PWA
         </div>
 
-        <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 5px;">
-            <button class="btn-micro" onclick="downloadBackup()" title="Descargar copia">
-                <i class="fas fa-download"></i> Guardar Respaldo
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-micro" onclick="downloadBackup()" title="Descargar copia de seguridad">
+                <i class="fas fa-save"></i> Respaldar
             </button>
-            <label class="btn-micro" title="Cargar copia guardada">
-                <i class="fas fa-upload"></i> Cargar Respaldo
+            <label class="btn-micro" title="Restaurar copia guardada">
+                <i class="fas fa-folder-open"></i> Cargar
                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importBackup(event)">
             </label>
         </div>
@@ -192,10 +216,10 @@
         <h2>📕 Plan de estudio</h2>
 
         <div class="input-group">
-            <label>Tema / Cuestionario actual</label>
-            <div style="display: flex; gap: 8px;">
+            <label>Cuestionario Actual</label>
+            <div style="display: flex; gap: 10px;">
                 <select id="quiz-selector" onchange="changeQuiz()"></select>
-                <button class="btn-outline" style="width: auto; padding: 0 15px; margin: 0; margin-top:0;" onclick="createNewQuiz()" title="Crear nuevo cuestionario">
+                <button class="btn-outline" style="width: auto; padding: 0 18px; margin: 0;" onclick="createNewQuiz()" title="Crear nuevo">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
@@ -203,45 +227,44 @@
         
         <div class="input-group">
             <label>Pregunta (Obligatoria)</label>
-            <textarea id="question-input" rows="2" placeholder="Escribe aquí tu pregunta..."></textarea>
+            <textarea id="question-input" rows="2" placeholder="Redacta la pregunta aquí..."></textarea>
         </div>
         <div class="input-group">
-            <label>Respuesta Correcta (Opcional por ahora)</label>
-            <textarea id="answer-input" rows="2" placeholder="Puedes dejarla en blanco y llenarla después..."></textarea>
+            <label>Respuesta Correcta (Opcional)</label>
+            <textarea id="answer-input" rows="2" placeholder="Si no la sabes aún, déjala en blanco..."></textarea>
         </div>
         
         <button id="save-btn" class="btn-primary" onclick="addQuestion()" style="margin-bottom: 5px;">
-            <i class="fas fa-save"></i> Guardar Pregunta
+            <i class="fas fa-check-circle"></i> Guardar Pregunta
         </button>
-        <button id="cancel-edit-btn" class="btn-outline hidden" onclick="cancelEdit()" style="margin-bottom: 15px; margin-top:5px;">
+        <button id="cancel-edit-btn" class="btn-outline hidden" onclick="cancelEdit()" style="margin-top:10px;">
             <i class="fas fa-times"></i> Cancelar Edición
         </button>
         
-        <div style="margin-top: 25px; margin-bottom: 10px; display:flex; justify-content: space-between; align-items:center;">
-            <label style="margin:0;">Lista de Preguntas (<span id="count" style="color: var(--primary);">0</span>)</label>
+        <div style="margin-top: 30px; margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
+            <label style="margin:0; font-size:15px; color:var(--text-main);">Tu banco de preguntas (<span id="count" style="color: var(--primary);">0</span>)</label>
         </div>
 
-        <!-- BUSCADOR -->
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="search-input" placeholder="Buscar pregunta o respuesta..." oninput="updateListUI()">
+            <input type="text" id="search-input" placeholder="Buscar palabras clave..." oninput="updateListUI()">
         </div>
 
         <div class="questions-list-container" id="list-container">
             <div id="questions-list"></div>
         </div>
         
-        <div style="margin-top: 20px;">
+        <div style="margin-top: 25px;">
             <div class="checkbox-container">
                 <input type="checkbox" id="shuffle-checkbox"> 
-                <label for="shuffle-checkbox" style="margin:0; display:inline;">Mezclar orden al jugar (Aleatorio)</label>
+                <label for="shuffle-checkbox" style="margin:0; display:inline;">Mezclar orden (Aleatorio)</label>
             </div>
 
-            <button class="btn-success" style="margin-top: 15px;" onclick="startStudy()">
-                <i class="fas fa-play"></i> Iniciar Examen Directo
+            <button class="btn-success" onclick="startStudy()">
+                <i class="fas fa-graduation-cap"></i> Iniciar Examen Directo
             </button>
             <button class="btn-pdf" onclick="exportPDF()">
-                <i class="fas fa-file-pdf"></i> Guardar en PDF
+                <i class="fas fa-file-pdf"></i> Generar Guía en PDF
             </button>
         </div>
     </div>
@@ -249,41 +272,42 @@
     <!-- MODO ESTUDIO -->
     <div class="container hidden" id="study-section">
         <div class="stats-bar">
-            <span id="question-counter"><i class="fas fa-list-ol"></i> 1/1</span>
-            <span id="score-counter"><i class="fas fa-star" style="color:#fbbf24;"></i> 0</span>
+            <span id="question-counter" style="color:var(--text-main);"><i class="fas fa-layer-group" style="color:var(--primary);"></i> 1/1</span>
+            <span id="score-counter" style="color:var(--text-main);"><i class="fas fa-star" style="color:var(--warning);"></i> 0 Puntos</span>
         </div>
         
         <div class="question-box" id="display-question">La pregunta aparecerá aquí</div>
         
-        <textarea id="user-answer" rows="3" placeholder="Escribe tu respuesta aquí..."></textarea>
+        <textarea id="user-answer" rows="3" placeholder="Redacta tu respuesta..."></textarea>
         
-        <p id="feedback" class="feedback"></p>
+        <p id="feedback" class="feedback hidden"></p>
         
-        <!-- NUEVO: Botón para forzar respuesta correcta -->
         <button class="btn-override hidden" id="override-btn" onclick="overrideCorrect()">
             <i class="fas fa-balance-scale"></i> Mi respuesta es correcta (Forzar acierto)
         </button>
 
-        <button class="btn-primary" id="check-btn" onclick="checkAnswer()">Comprobar Respuesta</button>
-        <button class="btn-success hidden" id="next-btn" onclick="nextQuestion()">Siguiente <i class="fas fa-arrow-right"></i></button>
-        <button class="btn-outline" style="margin-top: 15px;" onclick="location.reload()">Abandonar estudio</button>
+        <button class="btn-primary" id="check-btn" onclick="checkAnswer()" style="margin-top:20px;">Comprobar</button>
+        <button class="btn-success hidden" id="next-btn" onclick="nextQuestion()">Continuar <i class="fas fa-arrow-right"></i></button>
+        <button class="btn-outline" style="margin-top: 20px;" onclick="location.reload()">Abandonar</button>
     </div>
 
     <!-- RESULTADOS -->
     <div class="container hidden" id="results-section">
-        <h2>📕 Plan de estudio</h2>
-        <div class="question-box" style="font-size: 24px; color: var(--primary);">
+        <h2>📕 Resultados Finales</h2>
+        <div class="question-box" style="font-size: 28px; color: var(--primary); margin-bottom: 10px;">
             <span id="final-score">0/0</span>
         </div>
-        <p id="final-message" style="text-align: center; font-weight: 600; margin-bottom: 25px;"></p>
+        <p id="final-message" style="text-align: center; font-size:15px; color:var(--text-muted); font-weight: 500; margin-bottom: 15px;"></p>
         
-        <button class="btn-primary" onclick="restartStudy()"><i class="fas fa-redo"></i> Repetir cuestionario</button>
-        <button class="btn-outline" onclick="location.reload()" style="margin-top: 10px;"><i class="fas fa-home"></i> Volver al menú</button>
+        <div id="mistakes-list" class="mistakes-container"></div>
+        
+        <button class="btn-primary" onclick="restartStudy()" style="margin-top:25px;"><i class="fas fa-redo"></i> Intentarlo de nuevo</button>
+        <button class="btn-outline" onclick="location.reload()"><i class="fas fa-home"></i> Volver al inicio</button>
     </div>
 
     <script>
         // ==========================================
-        // SERVICE WORKER (Para PWA)
+        // PWA SETUP
         // ==========================================
         const swCode = `
             self.addEventListener('install', (e) => self.skipWaiting());
@@ -313,7 +337,7 @@
         });
 
         // ==========================================
-        // GESTIÓN DE DATOS Y LISTAS
+        // LÓGICA DE DATOS
         // ==========================================
         let allData = JSON.parse(localStorage.getItem('misCuestionarios')) || { "Cuestionario Base": [] };
         let currentQuizName = Object.keys(allData)[0];
@@ -322,6 +346,9 @@
         let currentIndex = 0;
         let score = 0;
         let editingIndex = -1; 
+        
+        // Rastreador de resultados para la pantalla final
+        let sessionResults = [];
 
         window.onload = () => {
             updateSelectorUI();
@@ -346,7 +373,7 @@
         }
 
         function createNewQuiz() {
-            let name = prompt("Escribe un nombre para el nuevo cuestionario:");
+            let name = prompt("Nombre para el nuevo cuestionario:");
             if (name && name.trim() !== "") {
                 if (!allData[name]) {
                     allData[name] = [];
@@ -372,17 +399,12 @@
             const q = document.getElementById('question-input').value.trim();
             const a = document.getElementById('answer-input').value.trim();
             
-            if (!q) {
-                alert("Debes escribir al menos la pregunta.");
-                return;
-            }
+            if (!q) { alert("La pregunta no puede estar vacía."); return; }
 
-            const isDuplicate = flashcards.some((fc, idx) => {
-                return idx !== editingIndex && fc.question.trim().toLowerCase() === q.toLowerCase();
-            });
+            const isDuplicate = flashcards.some((fc, idx) => idx !== editingIndex && fc.question.trim().toLowerCase() === q.toLowerCase());
 
             if (isDuplicate) {
-                const conf = confirm("¡Aviso! Ya existe una pregunta idéntica en este cuestionario. ¿Deseas guardarla de todos modos?");
+                const conf = confirm("¡Aviso! Ya existe una pregunta idéntica. ¿Guardar de todos modos?");
                 if (!conf) return; 
             }
 
@@ -406,7 +428,7 @@
             document.getElementById('answer-input').value = flashcards[index].answer;
             
             const saveBtn = document.getElementById('save-btn');
-            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar Pregunta';
+            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Guardar Cambios';
             saveBtn.style.backgroundColor = 'var(--warning)';
             
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
@@ -422,7 +444,7 @@
             document.getElementById('answer-input').value = '';
             
             const saveBtn = document.getElementById('save-btn');
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Pregunta';
+            saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> Guardar Pregunta';
             saveBtn.style.backgroundColor = 'var(--primary)';
             
             document.getElementById('cancel-edit-btn').classList.add('hidden');
@@ -430,7 +452,7 @@
         }
 
         function deleteQuestion(index) {
-            if (confirm("¿Estás seguro de borrar esta pregunta?")) {
+            if (confirm("¿Borrar permanentemente esta pregunta?")) {
                 if (editingIndex === index) cancelEdit();
                 flashcards.splice(index, 1);
                 saveData();
@@ -443,12 +465,9 @@
                 let temp = flashcards[index];
                 flashcards[index] = flashcards[index - 1];
                 flashcards[index - 1] = temp;
-                
                 if (editingIndex === index) editingIndex = index - 1;
                 else if (editingIndex === index - 1) editingIndex = index;
-
-                saveData();
-                updateListUI();
+                saveData(); updateListUI();
             }
         }
 
@@ -457,24 +476,20 @@
                 let temp = flashcards[index];
                 flashcards[index] = flashcards[index + 1];
                 flashcards[index + 1] = temp;
-                
                 if (editingIndex === index) editingIndex = index + 1;
                 else if (editingIndex === index + 1) editingIndex = index;
-
-                saveData();
-                updateListUI();
+                saveData(); updateListUI();
             }
         }
 
         function updateListUI() {
             const listEl = document.getElementById('questions-list');
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            
             document.getElementById('count').innerText = flashcards.length;
             listEl.innerHTML = '';
 
             if (flashcards.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; margin-top:20px;">No hay preguntas aquí.</div>';
+                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Aún no tienes preguntas en esta lista.</div>';
                 return;
             }
 
@@ -482,20 +497,19 @@
 
             if (searchTerm) {
                 displayCards = displayCards.filter(obj => 
-                    obj.item.question.toLowerCase().includes(searchTerm) || 
-                    obj.item.answer.toLowerCase().includes(searchTerm)
+                    obj.item.question.toLowerCase().includes(searchTerm) || obj.item.answer.toLowerCase().includes(searchTerm)
                 );
             }
 
             if (displayCards.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; margin-top:20px;">No se encontraron coincidencias para tu búsqueda.</div>';
+                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Sin resultados para la búsqueda.</div>';
                 return;
             }
 
             displayCards.forEach((obj) => {
                 const item = obj.item;
                 const index = obj.originalIndex;
-                let answerDisplay = item.answer !== "" ? item.answer : '<span class="no-answer">(Sin respuesta aún)</span>';
+                let answerDisplay = item.answer !== "" ? item.answer : '<span class="no-answer"><i class="fas fa-exclamation-circle"></i> Pendiente de respuesta</span>';
                 
                 const isEditingClass = (index === editingIndex) ? 'editing' : '';
                 const disableMove = searchTerm ? 'disabled' : '';
@@ -504,16 +518,16 @@
                     <div class="question-item ${isEditingClass}">
                         <div class="question-item-text">
                             <strong>${index + 1}. P:</strong> ${item.question}<br>
-                            <strong>R:</strong> ${answerDisplay}
+                            <strong style="color:var(--primary);">R:</strong> ${answerDisplay}
                         </div>
                         <div class="question-item-actions">
                             <div class="action-btns">
-                                <button onclick="moveUp(${index})" class="btn-icon btn-move" title="Mover arriba" ${disableMove}><i class="fas fa-arrow-up"></i></button>
-                                <button onclick="moveDown(${index})" class="btn-icon btn-move" title="Mover abajo" ${disableMove}><i class="fas fa-arrow-down"></i></button>
+                                <button onclick="moveUp(${index})" class="btn-icon btn-move" ${disableMove}><i class="fas fa-arrow-up"></i></button>
+                                <button onclick="moveDown(${index})" class="btn-icon btn-move" ${disableMove}><i class="fas fa-arrow-down"></i></button>
                             </div>
                             <div class="action-btns">
-                                <button onclick="editQuestion(${index})" class="btn-icon btn-edit" title="Modificar"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteQuestion(${index})" class="btn-icon btn-delete" title="Borrar"><i class="fas fa-trash"></i></button>
+                                <button onclick="editQuestion(${index})" class="btn-icon btn-edit"><i class="fas fa-pen"></i></button>
+                                <button onclick="deleteQuestion(${index})" class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     </div>
@@ -522,168 +536,129 @@
         }
 
         // ==========================================
-        // RESPALDOS Y EXPORTACIONES
+        // EXPORTACIONES Y RESPALDOS
         // ==========================================
         function downloadBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            const dateStr = new Date().toISOString().split('T')[0];
-            downloadAnchorNode.setAttribute("download", `Respaldo_Cuestionarios_${dateStr}.json`);
-            document.body.appendChild(downloadAnchorNode); 
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+            downloadAnchorNode.setAttribute("download", `Respaldo_Estudio_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
         }
 
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (importedData && typeof importedData === 'object') {
-                        if(confirm("¿Estás seguro de cargar este respaldo? Reemplazará los cuestionarios actuales que tengas sin guardar.")) {
+                        if(confirm("Esto reemplazará el contenido actual. ¿Continuar?")) {
                             allData = importedData;
                             localStorage.setItem('misCuestionarios', JSON.stringify(allData));
-                            currentQuizName = Object.keys(allData)[0] || "Cuestionario Base";
+                            currentQuizName = Object.keys(allData)[0];
                             flashcards = allData[currentQuizName] || [];
-                            cancelEdit();
-                            updateSelectorUI();
-                            updateListUI();
-                            alert("¡Respaldo cargado correctamente!");
+                            cancelEdit(); updateSelectorUI(); updateListUI();
+                            alert("Respaldo restaurado con éxito.");
                         }
                     }
-                } catch (err) {
-                    alert("El archivo seleccionado no es un respaldo válido.");
-                }
+                } catch (err) { alert("El archivo no es válido."); }
                 event.target.value = ''; 
             };
             reader.readAsText(file);
         }
 
         function exportPDF() {
-            if (flashcards.length === 0) {
-                alert("Agrega al menos una pregunta antes de exportar.");
-                return;
-            }
+            if (flashcards.length === 0) { alert("No hay preguntas para exportar."); return; }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('portrait', 'mm', 'a4'); 
-            
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
 
-            doc.setFillColor(15, 23, 42); 
-            doc.rect(0, 0, pageWidth, 18, 'F'); 
+            // Encabezado Premium
+            doc.setFillColor(30, 41, 59); // Slate-800
+            doc.rect(0, 0, pageWidth, 25, 'F'); 
             
             doc.setTextColor(255, 255, 255); 
-            doc.setFontSize(14); 
+            doc.setFontSize(18); 
             doc.setFont("helvetica", "bold");
-            doc.text("Guía de Preparación", 15, 11);
+            doc.text("Guía Oficial de Preparación", 15, 16);
 
-            doc.setFontSize(9);
+            doc.setTextColor(203, 213, 225); 
+            doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            const date = new Date().toLocaleDateString();
-            doc.text(`Fecha: ${date}`, pageWidth - 15, 11, { align: 'right' });
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, pageWidth - 15, 16, { align: 'right' });
 
-            doc.setTextColor(51, 65, 85); 
-            doc.setFontSize(12);
+            doc.setTextColor(15, 23, 42); 
+            doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
-            doc.text(`Tema: ${currentQuizName}`, 15, 26);
+            doc.text(`${currentQuizName}`, 15, 36);
             
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            doc.text(`Total de preguntas: ${flashcards.length}`, 15, 31);
+            doc.setTextColor(100, 116, 139); 
+            doc.text(`Preguntas Totales: ${flashcards.length}`, 15, 42);
             
-            doc.setDrawColor(226, 232, 240);
-            doc.setLineWidth(0.5);
-            doc.line(15, 34, pageWidth - 15, 34);
-
-            const tableData = flashcards.map((fc, i) => [
-                i + 1, 
-                fc.question, 
-                fc.answer !== "" ? fc.answer : "______________________________________"
-            ]);
+            const tableData = flashcards.map((fc, i) => [ i + 1, fc.question, fc.answer !== "" ? fc.answer : "________________________________________________" ]);
             
             doc.autoTable({
-                startY: 38,
+                startY: 48,
                 head: [['Nº', 'Pregunta', 'Respuesta Correcta']],
                 body: tableData,
                 theme: 'grid',
                 rowPageBreak: 'avoid', 
-                headStyles: { 
-                    fillColor: [220, 38, 38],
-                    textColor: 255, 
-                    fontStyle: 'bold',
-                    halign: 'center',
-                    valign: 'middle'
-                },
-                bodyStyles: {
-                    textColor: [30, 41, 59],
-                    fontSize: 10,
-                    valign: 'middle',
-                    lineColor: [226, 232, 240]
-                },
-                alternateRowStyles: {
-                    fillColor: [248, 250, 252]
-                },
-                columnStyles: { 
-                    0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' }, 
-                    1: { cellWidth: 85, fontStyle: 'bold' },
-                    2: { cellWidth: 83 } 
-                },
+                headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold', halign: 'center' }, // Color azul primary
+                bodyStyles: { textColor: [15, 23, 42], fontSize: 10, lineColor: [226, 232, 240] },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                columnStyles: { 0: { cellWidth: 10, halign: 'center', fontStyle: 'bold' }, 1: { cellWidth: 85, fontStyle: 'bold' }, 2: { cellWidth: 85 } },
                 margin: { left: 15, right: 15, bottom: 20 },
-                
                 didDrawPage: function (data) {
-                    doc.setFontSize(9);
-                    doc.setTextColor(148, 163, 184); 
-                    doc.text(
-                        `Página ${doc.internal.getNumberOfPages()}`, 
-                        pageWidth - 15, 
-                        pageHeight - 10, 
-                        { align: 'right' }
-                    );
+                    doc.setFontSize(9); doc.setTextColor(148, 163, 184); 
+                    doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageWidth - 15, pageHeight - 10, { align: 'right' });
                 }
             });
-            
-            let filename = currentQuizName.replace(/\s+/g, '_') + '_Ascenso.pdf';
-            doc.save(filename);
+            doc.save(currentQuizName.replace(/\s+/g, '_') + '_Manual.pdf');
         }
 
         // ==========================================
-        // LÓGICA DE ESTUDIO
+        // ALGORITMO LEVENSHTEIN (TOLERANCIA A ERRORES DE DEDO)
         // ==========================================
-        function shuffleArray(array) {
-            let newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        function levenshteinDistance(a, b) {
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                        );
+                    }
+                }
             }
-            return newArray;
+            return matrix[b.length][a.length];
         }
 
+        // ==========================================
+        // LÓGICA DE ESTUDIO INTELIGENTE
+        // ==========================================
         function startStudy() {
-            if (flashcards.length === 0) {
-                alert("Agrega preguntas a este cuestionario primero.");
-                return;
-            }
+            if (flashcards.length === 0) { alert("Agrega preguntas primero."); return; }
             
             const pendientes = flashcards.filter(f => f.answer === "");
             if (pendientes.length > 0) {
-                alert("¡Espera! Tienes preguntas marcadas '(Sin respuesta aún)'. Complétalas antes de jugar.");
-                return;
+                alert("Tienes preguntas marcadas como '(Sin respuesta aún)'. Llénalas antes de empezar el examen."); return;
             }
 
             const wantsShuffle = document.getElementById('shuffle-checkbox').checked;
-            if (wantsShuffle) {
-                studyCards = shuffleArray(flashcards);
-            } else {
-                studyCards = [...flashcards]; 
-            }
+            studyCards = wantsShuffle ? shuffleArray(flashcards) : [...flashcards]; 
             
-            currentIndex = 0;
-            score = 0;
+            currentIndex = 0; score = 0; sessionResults = [];
+            
             document.getElementById('setup-section').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
             document.getElementById('study-section').classList.remove('hidden');
@@ -691,20 +666,19 @@
         }
 
         function showQuestion() {
-            document.getElementById('feedback').innerText = '';
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = ''; feedback.classList.add('hidden');
             document.getElementById('next-btn').classList.add('hidden');
             document.getElementById('override-btn').classList.add('hidden');
             
-            document.getElementById('question-counter').innerHTML = `<i class="fas fa-list-ol"></i> ${currentIndex + 1}/${studyCards.length}`;
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            document.getElementById('question-counter').innerHTML = `<i class="fas fa-layer-group" style="color:var(--primary);"></i> Pregunta ${currentIndex + 1} de ${studyCards.length}`;
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
             document.getElementById('display-question').innerText = studyCards[currentIndex].question;
             
             const txtInput = document.getElementById('user-answer');
             document.getElementById('check-btn').classList.remove('hidden');
             
-            txtInput.value = '';
-            txtInput.disabled = false;
-            txtInput.focus();
+            txtInput.value = ''; txtInput.disabled = false; txtInput.focus();
         }
 
         function checkAnswer() {
@@ -712,18 +686,9 @@
             const correctAnswer = studyCards[currentIndex].answer.trim();
             const feedback = document.getElementById('feedback');
 
-            if (userAnswer === "") {
-                alert("Por favor escribe una respuesta.");
-                return;
-            }
+            if (userAnswer === "") { alert("Por favor escribe una respuesta para comprobar."); return; }
 
-            const normalize = (str) => {
-                return str.toLowerCase()
-                          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-                          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ") 
-                          .replace(/\s+/g, " ") 
-                          .trim();
-            };
+            const normalize = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ").replace(/\s+/g, " ").trim();
 
             const normUser = normalize(userAnswer);
             const normCorrect = normalize(correctAnswer);
@@ -731,61 +696,67 @@
             let isCorrect = false;
             let isFuzzy = false;
 
-            if (normUser === normCorrect) {
+            // Nivel 1: Distancia de Levenshtein (Permite pequeños errores ortográficos)
+            const maxLen = Math.max(normUser.length, normCorrect.length);
+            const distance = levenshteinDistance(normUser, normCorrect);
+            const similarity = maxLen === 0 ? 1 : 1 - (distance / maxLen);
+
+            if (similarity >= 0.80) { // 80% de similitud es correcto
                 isCorrect = true;
             } else {
-                const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'de', 'del', 'al', 'con', 'por', 'para', 'en', 'a', 'es', 'son', 'se', 'lo', 'que', 'como', 'su', 'sus'];
-                
+                // Nivel 2: Coincidencia por Palabras Clave
+                const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'de', 'del', 'al', 'con', 'por', 'para', 'en', 'a', 'es', 'son', 'se', 'lo', 'que', 'como'];
                 const cWords = normCorrect.split(' ').filter(w => !stopWords.includes(w) && w.length > 2);
                 
                 if (cWords.length > 0) {
                     let matches = 0;
-                    cWords.forEach(cw => {
-                        if (normUser.includes(cw)) matches++;
-                    });
-                    
-                    if ((matches / cWords.length) >= 0.7) {
-                        isCorrect = true;
-                        isFuzzy = true;
-                    }
-                } else {
-                    if (normUser.includes(normCorrect)) {
-                        isCorrect = true;
-                        isFuzzy = true;
-                    }
+                    cWords.forEach(cw => { if (normUser.includes(cw)) matches++; });
+                    if ((matches / cWords.length) >= 0.7) { isCorrect = true; isFuzzy = true; }
+                } else if (normUser.includes(normCorrect)) {
+                    isCorrect = true; isFuzzy = true;
                 }
             }
 
+            feedback.classList.remove('hidden');
+
             if (isCorrect) {
                 score++;
-                if (isFuzzy) {
-                    feedback.innerHTML = `<i class="fas fa-check-double"></i> ¡Bien! Lo detecté como correcto.<br><span style="font-size:14px; font-weight:normal; color:#16a34a; display:block; margin-top:5px;">La respuesta exacta era: <b>${correctAnswer}</b></span>`;
+                if (similarity >= 0.80 && similarity < 1) {
+                    feedback.innerHTML = `<i class="fas fa-check-circle"></i> ¡Correcto! (Contiene errores ortográficos pequeños).<br><span style="font-size:14px; font-weight:normal; color:#065f46; display:block; margin-top:5px;">Respuesta oficial: <b>${correctAnswer}</b></span>`;
+                } else if (isFuzzy) {
+                    feedback.innerHTML = `<i class="fas fa-check-double"></i> ¡Idea correcta!<br><span style="font-size:14px; font-weight:normal; color:#065f46; display:block; margin-top:5px;">Respuesta oficial: <b>${correctAnswer}</b></span>`;
                 } else {
                     feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Exacto, respuesta perfecta!';
                 }
                 feedback.className = "feedback correct";
                 document.getElementById('override-btn').classList.add('hidden');
             } else {
-                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#64748b; display:block; margin-top:5px;">La respuesta correcta es: <b>${correctAnswer}</b></span>`;
+                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#991b1b; display:block; margin-top:5px;">La respuesta oficial es: <b>${correctAnswer}</b></span>`;
                 feedback.className = "feedback incorrect";
-                
-                // Mostrar botón para forzar acierto si el usuario considera que sí estaba bien
-                document.getElementById('override-btn').classList.remove('hidden');
+                document.getElementById('override-btn').classList.remove('hidden'); // Botón de forzar acierto
             }
             
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            // Guardar resultado para el resumen final
+            sessionResults.push({
+                question: studyCards[currentIndex].question,
+                correctAnswer: correctAnswer,
+                userAnswer: userAnswer,
+                isCorrect: isCorrect
+            });
+            
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
             document.getElementById('user-answer').disabled = true;
             document.getElementById('check-btn').classList.add('hidden');
             document.getElementById('next-btn').classList.remove('hidden');
         }
 
-        // NUEVO: Función para anular la calificación incorrecta del sistema
         function overrideCorrect() {
             score++;
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:#fbbf24;"></i> ${score}`;
+            sessionResults[sessionResults.length - 1].isCorrect = true; // Actualiza el historial
             
+            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
             const feedback = document.getElementById('feedback');
-            feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Validada como correcta manualmente!';
+            feedback.innerHTML = '<i class="fas fa-user-check"></i> ¡Punto reclamado manualmente!';
             feedback.className = "feedback correct";
             
             document.getElementById('override-btn').classList.add('hidden');
@@ -793,11 +764,8 @@
 
         function nextQuestion() {
             currentIndex++;
-            if (currentIndex < studyCards.length) {
-                showQuestion();
-            } else {
-                showResults();
-            }
+            if (currentIndex < studyCards.length) showQuestion();
+            else showResults();
         }
 
         function showResults() {
@@ -808,9 +776,28 @@
             const message = document.getElementById('final-message');
             const porcentaje = score / studyCards.length;
             
-            if (porcentaje === 1) message.innerText = "¡Impecable! Estás listo para el ascenso.";
-            else if (porcentaje >= 0.7) message.innerText = "¡Muy bien! Un pequeño repaso más y lo tienes.";
-            else message.innerText = "Sigue practicando, la repetición es la clave del éxito.";
+            if (porcentaje === 1) message.innerText = "¡Excelente! Dominas completamente el tema.";
+            else if (porcentaje >= 0.7) message.innerText = "¡Muy bien! Un pequeño repaso más a los errores y estarás listo.";
+            else message.innerText = "Hay que seguir repasando. Concéntrate en la lista de errores abajo.";
+
+            // Renderizar resumen de errores
+            const mistakesList = document.getElementById('mistakes-list');
+            mistakesList.innerHTML = '';
+            
+            const mistakes = sessionResults.filter(r => !r.isCorrect);
+            if (mistakes.length > 0) {
+                mistakesList.innerHTML = '<h3 style="color:var(--danger); font-size:18px; margin-top:20px; border-bottom:2px solid #fecaca; padding-bottom:10px;"><i class="fas fa-clipboard-list"></i> Preguntas a repasar:</h3>';
+                mistakes.forEach(m => {
+                    mistakesList.innerHTML += `
+                    <div class="mistake-card">
+                        <p style="margin:0 0 8px 0; color:var(--text-main);"><strong>P:</strong> ${m.question}</p>
+                        <p style="margin:0 0 5px 0; color:var(--danger);"><strong>Tu respuesta:</strong> <del>${m.userAnswer}</del></p>
+                        <p style="margin:0; color:var(--success);"><strong>Respuesta oficial:</strong> ${m.correctAnswer}</p>
+                    </div>`;
+                });
+            } else {
+                mistakesList.innerHTML = '<div style="background:var(--success-light); border:1px solid #a7f3d0; padding:15px; border-radius:10px; color:#065f46; text-align:center; font-weight:600; margin-top:20px;"><i class="fas fa-trophy"></i> ¡Cero errores! Estudio perfecto.</div>';
+            }
         }
 
         function restartStudy() { startStudy(); }
