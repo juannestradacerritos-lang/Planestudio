@@ -12,6 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
 
+    <!-- Librería PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -28,313 +29,55 @@
             --border-color: #e5e7eb;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text-main);
-            line-height: 1.5;
-            padding: 20px 16px;
-            padding-bottom: 80px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        h1 {
-            color: var(--primary-color);
-            font-size: 1.75rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        #network-status {
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 10px;
-            background-color: var(--accent-color);
-            color: white;
-            transition: all 0.3s ease;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--background); color: var(--text-main); line-height: 1.5; padding: 20px 16px; padding-bottom: 80px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color); }
+        h1 { color: var(--primary-color); font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        #network-status { font-size: 0.85rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-top: 10px; background-color: var(--accent-color); color: white; }
         #network-status.offline { background-color: var(--danger-color); }
 
-        .form-section {
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            margin-bottom: 35px;
-            border-top: 4px solid var(--primary-color);
-        }
-
-        h2 {
-            font-size: 1.25rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
+        .form-section { background: var(--card-bg); padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 35px; border-top: 4px solid var(--primary-color); }
+        h2 { font-size: 1.25rem; color: var(--primary-color); margin-bottom: 20px; font-weight: 600; }
         .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); font-size: 0.95rem; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-main);
-            font-size: 0.95rem;
+        input[type="text"], input[type="url"], input[type="date"], textarea, input[type="file"] {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; background-color: #f9fafb;
         }
-
-        input[type="text"], 
-        input[type="url"], 
-        input[type="date"],
-        textarea, 
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 15px;
-            background-color: #f9fafb;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background-color: #fff;
-        }
-
+        input:focus, textarea:focus { outline: none; border-color: var(--secondary-color); background-color: #fff; }
         textarea { resize: vertical; min-height: 100px; }
 
         input[type="file"] { padding: 10px; background-color: #fff; cursor: pointer; }
-        input[type="file"]::file-selector-button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 12px;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        input[type="file"]::file-selector-button:hover { background-color: #1e40af; }
-
-        .submit-btn {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-        .submit-btn:hover { background-color: #1d4ed8; }
-
-        .cancel-btn {
-            background-color: var(--text-muted);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            margin-top: 10px;
-            display: none;
-        }
-        .cancel-btn:hover { background-color: #4b5563; }
-
-        .preview-img-container {
-            margin-top: 12px;
-            display: none;
-            background-color: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px dashed var(--border-color);
-            text-align: center;
-        }
-        .preview-img-container img {
-            max-height: 180px;
-            max-width: 100%;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 12px;
-            object-fit: contain;
-        }
-
-        .btn-remove-img {
-            background-color: white;
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .records-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .btn-pdf {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .btn-pdf:hover { background-color: #059669; }
-
-        .records-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .record-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border-color);
-        }
-
-        .record-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-bottom: 1px solid var(--border-color);
-        }
+        input[type="file"]::file-selector-button { background-color: var(--primary-color); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; margin-right: 12px; font-weight: 600; }
         
-        .no-img {
-            height: 140px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9fafb;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
+        .submit-btn { background-color: var(--secondary-color); color: white; border: none; padding: 14px 20px; font-size: 1rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; display: flex; justify-content: center; gap: 8px; }
+        .submit-btn:hover { background-color: #1d4ed8; }
+        .cancel-btn { background-color: var(--text-muted); color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; margin-top: 10px; display: none; }
+        
+        .preview-img-container { margin-top: 12px; display: none; background-color: #f9fafb; padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color); text-align: center; }
+        .preview-img-container img { max-height: 180px; max-width: 100%; border-radius: 6px; margin-bottom: 12px; object-fit: contain; }
+        .btn-remove-img { background-color: white; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
 
-        .record-content {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .record-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 8px;
-        }
-
-        .record-date {
-            font-size: 0.8rem;
-            color: var(--primary-color);
-            background-color: #eff6ff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            display: inline-block;
-            border: 1px solid #bfdbfe;
-        }
-
-        .record-notes {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 16px;
-            white-space: pre-wrap;
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 3px solid var(--accent-color);
-        }
-
+        .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .btn-pdf { background-color: var(--accent-color); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; display: flex; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .records-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .record-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; border: 1px solid var(--border-color); }
+        .record-img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid var(--border-color); }
+        .no-img { height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f9fafb; color: var(--text-muted); font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
+        
+        .record-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .record-title { font-size: 1.15rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px; }
+        .record-date { font-size: 0.8rem; color: var(--primary-color); background-color: #eff6ff; padding: 6px 10px; border-radius: 6px; font-weight: 600; display: inline-block; border: 1px solid #bfdbfe; }
+        .record-notes { font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin-bottom: 16px; white-space: pre-wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 3px solid var(--accent-color); }
+        
         .card-actions-wrapper { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-
-        .btn-gmaps {
-            background-color: #fff;
-            color: var(--secondary-color);
-            border: 1px solid var(--secondary-color);
-            text-align: center;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-gmaps:hover { background-color: #eff6ff; }
-
+        .btn-gmaps { background-color: #fff; color: var(--secondary-color); border: 1px solid var(--secondary-color); text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 600; display: flex; justify-content: center; gap: 8px; }
         .card-actions-row { display: flex; gap: 10px; }
-
-        .action-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-        }
-
+        .action-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; justify-content: center; gap: 6px; }
         .btn-edit { background-color: var(--warning-color); color: white; }
         .btn-delete { background-color: var(--danger-color); color: white; }
     </style>
@@ -343,10 +86,7 @@
 
     <div class="container">
         <header>
-            <h1>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                Control de Papelería
-            </h1>
+            <h1>📍 Control de Papelería</h1>
             <div id="network-status">Verificando conexión...</div>
         </header>
 
@@ -398,14 +138,6 @@
     </div>
 
     <script>
-        // Limpiador automático de caché PWA para que reconozca siempre el nuevo código
-        if ('caches' in window) {
-            caches.keys().then(names => {
-                for (let name of names) caches.delete(name);
-            });
-        }
-
-        // Función robusta para zona horaria (evita que la fecha salte de día)
         function obtenerFechaLocal() {
             const hoy = new Date();
             hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
@@ -457,7 +189,7 @@
                         </div>`;
 
             registros.forEach((reg, index) => {
-                let fechaDisplay = reg.fecha || 'Fecha no registrada'; 
+                let fechaDisplay = reg.fecha || 'Sin fecha'; 
                 if (reg.fechaEntrega && reg.fechaEntrega.includes('-')) {
                     const partes = reg.fechaEntrega.split('-');
                     if (partes.length === 3) fechaDisplay = `${partes[2]}/${partes[1]}/${partes[0]}`;
@@ -476,27 +208,14 @@
 
             container.innerHTML = html;
 
-            const opt = {
-                margin:       [15, 15, 15, 15],
-                filename:     'Reporte_Papeleria.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+            const opt = { margin: [15, 15, 15, 15], filename: 'Reporte_Papeleria.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
 
             try {
-                html2pdf().set(opt).from(container).save().then(() => {
-                    btn.innerHTML = btnText;
-                    btn.disabled = false;
-                }).catch(() => {
-                    alert("Error. Asegúrate de tener conexión a internet la primera vez.");
-                    btn.innerHTML = btnText;
-                    btn.disabled = false;
+                html2pdf().set(opt).from(container).save().then(() => { btn.innerHTML = btnText; btn.disabled = false; }).catch(() => {
+                    alert("Error al generar PDF."); btn.innerHTML = btnText; btn.disabled = false;
                 });
             } catch(e) {
-                alert("Librería de PDF no cargada. Revisa tu conexión a internet.");
-                btn.innerHTML = btnText;
-                btn.disabled = false;
+                alert("Librería de PDF no cargada."); btn.innerHTML = btnText; btn.disabled = false;
             }
         }
 
@@ -561,11 +280,8 @@
                 registros.unshift(nuevoRegistro);
             }
 
-            try {
-                localStorage.setItem('papeleria_registros', JSON.stringify(registros));
-            } catch (e) {
-                alert('Almacenamiento lleno. Elimine registros antiguos.');
-            }
+            try { localStorage.setItem('papeleria_registros', JSON.stringify(registros)); } 
+            catch (e) { alert('Memoria llena.'); }
             
             resetForm();
             renderizarRegistros();
@@ -576,7 +292,7 @@
             list.innerHTML = '';
 
             if (registros.length === 0) {
-                list.innerHTML = `<p style="text-align:center; padding: 20px;">No hay registros de papelería.</p>`;
+                list.innerHTML = `<p style="text-align:center; padding: 20px;">No hay registros.</p>`;
                 return;
             }
 
@@ -584,14 +300,9 @@
                 const card = document.createElement('div');
                 card.className = 'record-card';
 
-                let photoHTML = reg.foto 
-                    ? `<img src="${reg.foto}" class="record-img">`
-                    : `<div class="no-img">Sin fotografía</div>`;
+                let photoHTML = reg.foto ? `<img src="${reg.foto}" class="record-img">` : `<div class="no-img">Sin fotografía</div>`;
+                let mapHTML = reg.enlaceMaps ? `<a href="${reg.enlaceMaps}" target="_blank" class="btn-gmaps">🗺️ Ver Mapa</a>` : ``;
 
-                let mapHTML = reg.enlaceMaps 
-                    ? `<a href="${reg.enlaceMaps}" target="_blank" class="btn-gmaps">🗺️ Ver Mapa</a>` : ``;
-
-                // Procesamiento súper robusto para que la fecha nunca se pierda
                 let fechaDisplay = reg.fecha || 'Sin fecha registrada'; 
                 if (reg.fechaEntrega && reg.fechaEntrega.includes('-')) {
                     const partes = reg.fechaEntrega.split('-');
@@ -605,7 +316,7 @@
                         <div style="margin-bottom: 15px;">
                             <span class="record-date">📅 Entregado: ${fechaDisplay}</span>
                         </div>
-                        <div class="record-notes">${reg.notas || 'Sin notas registradas.'}</div>
+                        <div class="record-notes">${reg.notas || 'Sin notas.'}</div>
                         <div class="card-actions-wrapper">
                             ${mapHTML}
                             <div class="card-actions-row">
@@ -627,7 +338,6 @@
             document.getElementById('empresa').value = reg.empresa;
             document.getElementById('enlaceMaps').value = reg.enlaceMaps || '';
             document.getElementById('notas').value = reg.notas || '';
-            
             document.getElementById('fechaEntrega').value = reg.fechaEntrega || obtenerFechaLocal();
 
             if (reg.foto) {
@@ -645,7 +355,7 @@
         }
 
         function eliminarRegistro(id) {
-            if (confirm('¿Está seguro de que desea eliminar este registro?')) {
+            if (confirm('¿Eliminar este registro?')) {
                 registros = registros.filter(r => r.id !== id);
                 localStorage.setItem('papeleria_registros', JSON.stringify(registros));
                 renderizarRegistros();
@@ -664,7 +374,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(error => console.log('Error SW:', error));
+                navigator.serviceWorker.register('sw.js?v=2').catch(e => console.log('Error SW:', e));
             });
         }
     </script>
