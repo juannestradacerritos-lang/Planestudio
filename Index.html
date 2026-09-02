@@ -18,12 +18,12 @@
 
     <style>
         :root {
-            --primary-color: #1e3a8a; /* Azul ejecutivo profundo */
-            --secondary-color: #2563eb; /* Azul brillante para acciones */
-            --accent-color: #10b981; /* Verde esmeralda */
-            --danger-color: #ef4444; /* Rojo suave */
-            --warning-color: #f59e0b; /* Ambar */
-            --background: #f3f4f6; /* Gris muy claro */
+            --primary-color: #1e3a8a;
+            --secondary-color: #2563eb;
+            --accent-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --background: #f3f4f6;
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
@@ -50,7 +50,6 @@
             margin: 0 auto;
         }
 
-        /* Header Ejecutivo */
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -84,7 +83,6 @@
             background-color: var(--danger-color);
         }
 
-        /* Sección de Formulario */
         .form-section {
             background: var(--card-bg);
             padding: 24px;
@@ -158,9 +156,7 @@
             font-weight: 600;
             transition: background-color 0.2s;
         }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #1e40af;
-        }
+        input[type="file"]::file-selector-button:hover { background-color: #1e40af; }
 
         .submit-btn {
             background-color: var(--secondary-color);
@@ -230,7 +226,6 @@
         }
         .btn-remove-img:hover { background-color: #fef2f2; }
 
-        /* Lista de Registros */
         .records-header {
             display: flex;
             justify-content: space-between;
@@ -487,7 +482,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderizarRegistros();
             checkNetworkStatus();
-            // Colocar la fecha de hoy por defecto al cargar
             document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
         });
 
@@ -521,20 +515,25 @@
             btn.innerHTML = '⏳ Generando...';
             btn.disabled = true;
 
+            // Creamos un contenedor físico oculto en la pantalla (Solución al PDF en blanco)
             const container = document.createElement('div');
-            container.style.padding = '20px';
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '800px'; 
+            container.style.backgroundColor = '#ffffff';
+            container.style.padding = '40px';
             container.style.fontFamily = 'Helvetica, Arial, sans-serif';
             container.style.color = '#333';
 
             let html = `
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #1e3a8a; margin-bottom: 5px;">Reporte de Control de Papelería</h1>
+                    <h1 style="color: #1e3a8a; margin-bottom: 5px; font-size: 26px;">Reporte de Control de Papelería</h1>
                     <p style="color: #6b7280; font-size: 14px;">Documento generado el ${new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
             `;
 
             registros.forEach((reg, index) => {
-                // Formatear la fecha ingresada para el PDF
                 let fechaDisplay = reg.fecha; 
                 if (reg.fechaEntrega) {
                     const [yyyy, mm, dd] = reg.fechaEntrega.split('-');
@@ -542,9 +541,9 @@
                 }
 
                 html += `
-                    <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb; page-break-inside: avoid;">
-                        <h2 style="color: #2563eb; font-size: 18px; margin-bottom: 10px;">${index + 1}. ${reg.empresa}</h2>
-                        <p style="margin-bottom: 6px; font-size: 14px; color: #1e3a8a;"><strong>📅 Fecha de entrega:</strong> ${fechaDisplay}</p>
-                        <p style="margin-bottom: 8px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px;"><strong>📝 Notas:</strong> <br>${reg.notas || 'Sin notas.'}</p>
-                        ${reg.enlaceMaps ? `<p style="margin-bottom: 10px; font-size: 14px;"><strong>🗺️ Mapa:</strong> <a href="${reg.enlaceMaps}" style="color: #10b981;">Enlace de ubicación</a></p>` : ''}
-                        ${reg.foto ? `<div style="margin-top: 15px;"><img src="${reg.foto}" style="max-height:
+                    <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb; page-break-inside: avoid;">
+                        <h2 style="color: #2563eb; font-size: 20px; margin-bottom: 12px;">${index + 1}. ${reg.empresa}</h2>
+                        <p style="margin-bottom: 8px; font-size: 15px; color: #1e3a8a;"><strong>📅 Fecha de entrega:</strong> ${fechaDisplay}</p>
+                        <p style="margin-bottom: 12px; font-size: 15px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;"><strong>📝 Notas:</strong> <br>${reg.notas || 'Sin notas.'}</p>
+                        ${reg.enlaceMaps ? `<p style="margin-bottom: 15px; font-size: 15px;"><strong>🗺️ Mapa:</strong> <a href="${reg.enlaceMaps}" style="color: #10b981; text-decoration: none; font-weight: bold;">Ver ubicación exacta</a></p>` : ''}
+                        ${reg.foto ? `<div style="margin-top: 15px;
