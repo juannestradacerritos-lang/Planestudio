@@ -1,3 +1,4 @@
+// Cambiamos a v2 para obligar al teléfono a descargar el nuevo index.html
 const CACHE_NAME = 'papeleria-v2';
 const urlsToCache = [
   './',
@@ -6,7 +7,10 @@ const urlsToCache = [
   './icon.svg'
 ];
 
+// Instalar Service Worker y cachear recursos estáticos
 self.addEventListener('install', event => {
+  // Forzar al service worker a activarse inmediatamente
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -15,6 +19,7 @@ self.addEventListener('install', event => {
   );
 });
 
+// Interceptar peticiones para funcionar offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -24,17 +29,17 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// Actualizar el Service Worker y limpiar cachés antiguos (Aquí borra la v1)
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
