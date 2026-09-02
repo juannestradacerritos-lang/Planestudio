@@ -3,804 +3,788 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuestionario</title>
-    <meta name="theme-color" content="#3b82f6">
+    <title>Control de Papelería</title>
     
-    <!-- jsPDF para Exportar a PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    
-    <!-- Iconos de FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <script>
-        // TRUCO PWA EN UN SOLO ARCHIVO
-        const manifestData = {
-            name: "Plan de estudio",
-            short_name: "Cuestionario",
-            start_url: window.location.href,
-            display: "standalone",
-            background_color: "#f0f9ff",
-            theme_color: "#3b82f6",
-            icons: [{
-                src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📕</text></svg>",
-                sizes: "512x512",
-                type: "image/svg+xml",
-                purpose: "any maskable"
-            }]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/manifest+json'});
-        const manifestUrl = URL.createObjectURL(manifestBlob);
-        document.write(`<link rel="manifest" href="${manifestUrl}">`);
-    </script>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Librería para generar el PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
         :root {
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --success-light: #d1fae5;
-            --danger: #ef4444;
-            --danger-light: #fee2e2;
-            --warning: #f59e0b;
-            --info: #0ea5e9;
-            --purple: #8b5cf6;
-            --purple-hover: #7c3aed;
-            --background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            --primary-color: #1e3a8a; /* Azul ejecutivo profundo */
+            --secondary-color: #2563eb; /* Azul brillante para acciones */
+            --accent-color: #10b981; /* Verde esmeralda */
+            --danger-color: #ef4444; /* Rojo suave */
+            --warning-color: #f59e0b; /* Ambar */
+            --background: #f3f4f6; /* Gris muy claro */
             --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: var(--background);
+            background-color: var(--background);
             color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            line-height: 1.5;
+            padding: 20px 16px;
+            padding-bottom: 80px;
         }
 
         .container {
-            width: 100%;
-            max-width: 550px;
-            background: var(--card-bg);
-            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Ejecutivo */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #network-status {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 12px;
             border-radius: 20px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            display: inline-block;
+            margin-top: 10px;
+            background-color: var(--accent-color);
+            color: white;
             transition: all 0.3s ease;
         }
 
-        h2 { text-align: center; margin-top: 0; margin-bottom: 25px; color: var(--text-main); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
-        
-        .input-group { margin-bottom: 18px; }
-        label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px;}
-        
-        textarea, select, input[type="text"] {
-            width: 100%; padding: 14px; box-sizing: border-box;
-            border: 2px solid var(--border-light); border-radius: 10px;
-            font-size: 15px; transition: all 0.2s;
-            background-color: #f8fafc; font-family: inherit; color: var(--text-main);
+        #network-status.offline {
+            background-color: var(--danger-color);
         }
-        textarea { resize: vertical; min-height: 60px; }
-        textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); }
-        
-        button, .btn-label {
-            width: 100%; padding: 15px; margin-top: 5px;
-            border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; box-sizing: border-box;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        button:active, .btn-label:active { transform: translateY(2px); box-shadow: none; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2); }
-        .btn-success { background-color: var(--success); color: white; margin-top: 15px;}
-        .btn-pdf { background-color: #1e293b; color: white; margin-top: 12px; }
-        .btn-pdf:hover { background-color: #0f172a; }
-        .btn-override { background-color: var(--purple); color: white; margin-top: 15px; }
-        .btn-override:hover { background-color: var(--purple-hover); }
-        .btn-outline { background-color: transparent; border: 2px solid var(--border-light); color: var(--text-muted); margin-top: 12px; box-shadow: none;}
-        .btn-outline:hover { border-color: var(--text-muted); color: var(--text-main); }
-        
-        .btn-micro {
-            width: auto; padding: 8px 12px; margin: 0;
-            background-color: #f1f5f9; color: var(--text-muted);
-            border: 1px solid var(--border-light); border-radius: 8px; font-size: 12px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; box-shadow: none;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .btn-micro:hover { background-color: #e2e8f0; color: var(--text-main); }
-        
-        .hidden { display: none !important; }
-        
-        .search-box { position: relative; margin-bottom: 12px; }
-        .search-box i { position: absolute; left: 14px; top: 16px; color: #94a3b8; }
-        .search-box input { padding-left: 40px; background-color: #fff; }
 
-        .questions-list-container {
-            height: 300px; min-height: 150px; resize: vertical; overflow-y: auto;
-            border: 2px solid var(--border-light); border-radius: 12px; padding: 12px; background: #f8fafc;
+        /* Sección de Formulario */
+        .form-section {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 35px;
+            border-top: 4px solid var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], 
+        input[type="url"], 
+        textarea, 
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, 
+        input[type="url"]:focus, 
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background-color: #fff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #1e40af;
+        }
+
+        .submit-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .submit-btn:hover { background-color: #1d4ed8; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        .cancel-btn {
+            background-color: var(--text-muted);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 10px;
+            display: none;
+            transition: background-color 0.2s;
+        }
+        .cancel-btn:hover { background-color: #4b5563; }
+
+        .preview-img-container {
+            margin-top: 12px;
+            display: none;
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            text-align: center;
+        }
+        .preview-img-container img {
+            max-height: 180px;
+            max-width: 100%;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            object-fit: contain;
+        }
+
+        .btn-remove-img {
+            background-color: white;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-remove-img:hover { background-color: #fef2f2; }
+
+        /* Lista de Registros */
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn-pdf {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .btn-pdf:hover { background-color: #059669; }
+        .btn-pdf:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        .records-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .record-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .record-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .question-item {
-            background: white; padding: 15px; margin-bottom: 10px;
-            border-radius: 10px; border: 1px solid var(--border-light);
-            display: flex; flex-direction: column; gap: 12px;
-            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .question-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
-        .question-item.editing { border-color: var(--warning); background-color: #fffbeb; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
-        .question-item-text { font-size: 14px; color: var(--text-main); line-height: 1.5; }
-        .question-item-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-light); padding-top: 10px; }
-        
-        .action-btns { display: flex; gap: 6px; }
-        .btn-icon { width: 34px; height: 34px; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0; color: white; font-size: 13px; box-shadow: none;}
-        .btn-edit { background-color: var(--warning); }
-        .btn-delete { background-color: var(--danger); }
-        .btn-move { background-color: var(--info); }
-        .btn-icon:disabled { opacity: 0.3; background-color: var(--border-light); }
-        
-        .no-answer { color: var(--danger); font-style: italic; font-weight: 500; font-size: 13px; }
-
-        .stats-bar {
-            display: flex; justify-content: space-between; background: #f8fafc; padding: 15px;
-            border-radius: 12px; margin-bottom: 25px; font-weight: 600; font-size: 14px; border: 2px solid var(--border-light);
+        .no-img {
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9fafb;
             color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
         }
-        .question-box { 
-            background: #fff; padding: 30px 20px; border-radius: 12px; 
-            text-align: center; margin-bottom: 25px; font-size: 20px; font-weight: 600; border: 2px solid var(--border-light);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02); color: var(--text-main); line-height: 1.4;
-        }
-        
-        .feedback { text-align: center; font-weight: 600; margin: 20px 0; font-size: 16px; min-height: 24px; line-height: 1.5; padding: 15px; border-radius: 10px;}
-        .correct { background-color: var(--success-light); color: #065f46; border: 1px solid #a7f3d0; }
-        .incorrect { background-color: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
-        
-        .install-banner { 
-            background: linear-gradient(to right, #1e293b, #0f172a); color: white; padding: 14px; 
-            border-radius: 10px; text-align: center; margin-bottom: 25px; 
-            cursor: pointer; display: none; font-weight: 600; font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .checkbox-container {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 20px; font-size: 14px; font-weight: 600; color: var(--text-muted);
-            background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border-light);
+        .no-img svg { width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.5; }
+
+        .record-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Resumen de errores */
-        .mistakes-container {
-            margin-top: 20px; text-align: left;
+        .record-header-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
-        .mistake-card {
-            background: #fff; border: 1px solid #fecaca; border-left: 4px solid var(--danger);
-            padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; line-height: 1.5;
+
+        .record-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1.3;
         }
+
+        .record-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background-color: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .record-notes {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+        .empty-notes { font-style: italic; color: var(--text-muted); border-left-color: var(--border-color); }
+
+        .card-actions-wrapper { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .btn-gmaps {
+            background-color: #fff;
+            color: var(--secondary-color);
+            border: 1px solid var(--secondary-color);
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        .btn-gmaps:hover { background-color: #eff6ff; }
+
+        .card-actions-row { display: flex; gap: 10px; }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn:hover { opacity: 0.9; }
+
+        .btn-edit { background-color: var(--warning-color); color: white; }
+        .btn-delete { background-color: var(--danger-color); color: white; }
+
+        #installPWA {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            align-items: center;
+            gap: 8px;
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- MODO CREADOR -->
-    <div class="container" id="setup-section">
-        <div class="install-banner" id="install-banner">
-            <i class="fas fa-download"></i> Instalar como Aplicación PWA
-        </div>
+    <div class="container">
+        <header>
+            <h1>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Control de Papelería
+            </h1>
+            <div id="network-status">Verificando conexión...</div>
+        </header>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px;">
-            <button class="btn-micro" onclick="downloadBackup()" title="Descargar copia de seguridad">
-                <i class="fas fa-save"></i> Respaldar
-            </button>
-            <label class="btn-micro" title="Restaurar copia guardada">
-                <i class="fas fa-folder-open"></i> Cargar
-                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importBackup(event)">
-            </label>
-        </div>
-        
-        <h2>📕 Plan de estudio</h2>
+        <div class="form-section">
+            <h2 id="formTitle">Nuevo Registro</h2>
+            <form id="recordForm">
+                <input type="hidden" id="editId">
 
-        <div class="input-group">
-            <label>Cuestionario Actual</label>
-            <div style="display: flex; gap: 10px;">
-                <select id="quiz-selector" onchange="changeQuiz()"></select>
-                <button class="btn-outline" style="width: auto; padding: 0 18px; margin: 0;" onclick="createNewQuiz()" title="Crear nuevo">
-                    <i class="fas fa-plus"></i>
+                <div class="form-group">
+                    <label for="empresa">1. Empresa / Nombre del Lugar:</label>
+                    <input type="text" id="empresa" placeholder="Ej. Oficinas Centrales de Recursos Humanos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="enlaceMaps">2. Enlace de Google Maps:</label>
+                    <input type="url" id="enlaceMaps" placeholder="https://maps.app.goo.gl/...">
+                </div>
+
+                <div class="form-group">
+                    <label for="foto">3. Fotografía de evidencia:</label>
+                    <input type="file" id="foto" accept="image/*" onchange="previewImage(event)">
+                    
+                    <div class="preview-img-container" id="previewContainer">
+                        <img id="imagePreview" src="" alt="Vista previa">
+                        <button type="button" class="btn-remove-img" onclick="quitarImagen()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Quitar imagen
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notas">4. Notas:</label>
+                    <textarea id="notas" placeholder="Instrucciones, persona que recibió, fecha de seguimiento..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="saveBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Guardar Registro
                 </button>
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <label>Pregunta (Obligatoria)</label>
-            <textarea id="question-input" rows="2" placeholder="Redacta la pregunta aquí..."></textarea>
-        </div>
-        <div class="input-group">
-            <label>Respuesta Correcta (Opcional)</label>
-            <textarea id="answer-input" rows="2" placeholder="Si no la sabes aún, déjala en blanco..."></textarea>
-        </div>
-        
-        <button id="save-btn" class="btn-primary" onclick="addQuestion()" style="margin-bottom: 5px;">
-            <i class="fas fa-check-circle"></i> Guardar Pregunta
-        </button>
-        <button id="cancel-edit-btn" class="btn-outline hidden" onclick="cancelEdit()" style="margin-top:10px;">
-            <i class="fas fa-times"></i> Cancelar Edición
-        </button>
-        
-        <div style="margin-top: 30px; margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
-            <label style="margin:0; font-size:15px; color:var(--text-main);">Tu banco de preguntas (<span id="count" style="color: var(--primary);">0</span>)</label>
+                <button type="button" class="cancel-btn" id="cancelBtn" onclick="resetForm()">Cancelar Edición</button>
+            </form>
         </div>
 
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="search-input" placeholder="Buscar palabras clave..." oninput="updateListUI()">
-        </div>
-
-        <div class="questions-list-container" id="list-container">
-            <div id="questions-list"></div>
-        </div>
-        
-        <div style="margin-top: 25px;">
-            <div class="checkbox-container">
-                <input type="checkbox" id="shuffle-checkbox"> 
-                <label for="shuffle-checkbox" style="margin:0; display:inline;">Mezclar orden (Aleatorio)</label>
-            </div>
-
-            <button class="btn-success" onclick="startStudy()">
-                <i class="fas fa-graduation-cap"></i> Iniciar Examen Directo
-            </button>
-            <button class="btn-pdf" onclick="exportPDF()">
-                <i class="fas fa-file-pdf"></i> Generar Guía en PDF
+        <div class="records-header">
+            <h2>Registros Guardados</h2>
+            <button class="btn-pdf" id="btnDescargarPDF" onclick="generarPDF()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+                Descargar PDF
             </button>
         </div>
-    </div>
-
-    <!-- MODO ESTUDIO -->
-    <div class="container hidden" id="study-section">
-        <div class="stats-bar">
-            <span id="question-counter" style="color:var(--text-main);"><i class="fas fa-layer-group" style="color:var(--primary);"></i> 1/1</span>
-            <span id="score-counter" style="color:var(--text-main);"><i class="fas fa-star" style="color:var(--warning);"></i> 0 Puntos</span>
+        
+        <div class="records-list" id="recordsList">
+            <!-- Tarjetas dinámicas -->
         </div>
-        
-        <div class="question-box" id="display-question">La pregunta aparecerá aquí</div>
-        
-        <textarea id="user-answer" rows="3" placeholder="Redacta tu respuesta..."></textarea>
-        
-        <p id="feedback" class="feedback hidden"></p>
-        
-        <button class="btn-override hidden" id="override-btn" onclick="overrideCorrect()">
-            <i class="fas fa-balance-scale"></i> Mi respuesta es correcta (Forzar acierto)
-        </button>
-
-        <button class="btn-primary" id="check-btn" onclick="checkAnswer()" style="margin-top:20px;">Comprobar</button>
-        <button class="btn-success hidden" id="next-btn" onclick="nextQuestion()">Continuar <i class="fas fa-arrow-right"></i></button>
-        <button class="btn-outline" style="margin-top: 20px;" onclick="location.reload()">Abandonar</button>
     </div>
 
-    <!-- RESULTADOS -->
-    <div class="container hidden" id="results-section">
-        <h2>📕 Resultados Finales</h2>
-        <div class="question-box" style="font-size: 28px; color: var(--primary); margin-bottom: 10px;">
-            <span id="final-score">0/0</span>
-        </div>
-        <p id="final-message" style="text-align: center; font-size:15px; color:var(--text-muted); font-weight: 500; margin-bottom: 15px;"></p>
-        
-        <div id="mistakes-list" class="mistakes-container"></div>
-        
-        <button class="btn-primary" onclick="restartStudy()" style="margin-top:25px;"><i class="fas fa-redo"></i> Intentarlo de nuevo</button>
-        <button class="btn-outline" onclick="location.reload()"><i class="fas fa-home"></i> Volver al inicio</button>
-    </div>
+    <!-- PWA Install Prompt -->
+    <button id="installPWA" style="display: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Instalar Aplicación
+    </button>
 
     <script>
-        // ==========================================
-        // PWA SETUP
-        // ==========================================
-        const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
-            self.addEventListener('fetch', (e) => {
-                e.respondWith(fetch(e.request).catch(() => new Response('Modo Offline')));
-            });
-        `;
-        const swBlob = new Blob([swCode], {type: 'application/javascript'});
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob));
-        }
+        let registros = JSON.parse(localStorage.getItem('papeleria_registros')) || [];
+        let currentPhotoBase64 = null;
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-banner').style.display = 'block';
-        });
-        document.getElementById('install-banner').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                document.getElementById('install-banner').style.display = 'none';
-                deferredPrompt = null;
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarRegistros();
+            checkNetworkStatus();
         });
 
-        // ==========================================
-        // LÓGICA DE DATOS
-        // ==========================================
-        let allData = JSON.parse(localStorage.getItem('misCuestionarios')) || { "Cuestionario Base": [] };
-        let currentQuizName = Object.keys(allData)[0];
-        let flashcards = allData[currentQuizName];
-        let studyCards = [];
-        let currentIndex = 0;
-        let score = 0;
-        let editingIndex = -1; 
-        
-        // Rastreador de resultados para la pantalla final
-        let sessionResults = [];
-
-        window.onload = () => {
-            updateSelectorUI();
-            updateListUI();
-        };
-
-        function saveData() {
-            allData[currentQuizName] = flashcards;
-            localStorage.setItem('misCuestionarios', JSON.stringify(allData));
-        }
-
-        function updateSelectorUI() {
-            const selector = document.getElementById('quiz-selector');
-            selector.innerHTML = '';
-            for (let name in allData) {
-                let option = document.createElement('option');
-                option.value = name;
-                option.innerText = name;
-                if (name === currentQuizName) option.selected = true;
-                selector.appendChild(option);
-            }
-        }
-
-        function createNewQuiz() {
-            let name = prompt("Nombre para el nuevo cuestionario:");
-            if (name && name.trim() !== "") {
-                if (!allData[name]) {
-                    allData[name] = [];
-                    currentQuizName = name;
-                    flashcards = allData[currentQuizName];
-                    saveData();
-                    updateSelectorUI();
-                    updateListUI();
+        // --- MANEJO DE RED (Online/Offline) ---
+        function checkNetworkStatus() {
+            const statusIndicator = document.getElementById('network-status');
+            
+            function updateStatus() {
+                if (navigator.onLine) {
+                    statusIndicator.textContent = "🟢 Modo Conectado";
+                    statusIndicator.className = "";
                 } else {
-                    alert("Ese nombre ya existe.");
+                    statusIndicator.textContent = "🔴 Modo Sin Conexión";
+                    statusIndicator.className = "offline";
                 }
             }
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+            updateStatus();
         }
 
-        function changeQuiz() {
-            currentQuizName = document.getElementById('quiz-selector').value;
-            flashcards = allData[currentQuizName];
-            cancelEdit(); 
-            updateListUI();
-        }
-
-        function addQuestion() {
-            const q = document.getElementById('question-input').value.trim();
-            const a = document.getElementById('answer-input').value.trim();
-            
-            if (!q) { alert("La pregunta no puede estar vacía."); return; }
-
-            const isDuplicate = flashcards.some((fc, idx) => idx !== editingIndex && fc.question.trim().toLowerCase() === q.toLowerCase());
-
-            if (isDuplicate) {
-                const conf = confirm("¡Aviso! Ya existe una pregunta idéntica. ¿Guardar de todos modos?");
-                if (!conf) return; 
+        // --- GENERADOR DE PDF ---
+        function generarPDF() {
+            if (registros.length === 0) {
+                alert("No hay registros guardados para exportar.");
+                return;
             }
 
-            if (editingIndex > -1) {
-                flashcards[editingIndex] = { question: q, answer: a };
-                cancelEdit(); 
+            const btn = document.getElementById('btnDescargarPDF');
+            const btnText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando...';
+            btn.disabled = true;
+
+            // Crear un contenedor invisible para dar formato al PDF
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            container.style.fontFamily = 'Helvetica, Arial, sans-serif';
+            container.style.color = '#333';
+
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #1e3a8a; margin-bottom: 5px;">Reporte de Control de Papelería</h1>
+                    <p style="color: #6b7280; font-size: 14px;">Documento generado el ${new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</p>
+                </div>
+            `;
+
+            registros.forEach((reg, index) => {
+                html += `
+                    <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb; page-break-inside: avoid;">
+                        <h2 style="color: #2563eb; font-size: 18px; margin-bottom: 10px;">${index + 1}. ${reg.empresa}</h2>
+                        <p style="margin-bottom: 6px; font-size: 14px;"><strong>📅 Fecha:</strong> ${reg.fecha}</p>
+                        <p style="margin-bottom: 8px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px;"><strong>📝 Notas:</strong> <br>${reg.notas || 'Sin notas.'}</p>
+                        ${reg.enlaceMaps ? `<p style="margin-bottom: 10px; font-size: 14px;"><strong>🗺️ Mapa:</strong> <a href="${reg.enlaceMaps}" style="color: #10b981;">Enlace de ubicación</a></p>` : ''}
+                        ${reg.foto ? `<div style="margin-top: 15px;"><img src="${reg.foto}" style="max-height: 250px; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;"></div>` : '<p style="font-size: 12px; color: #9ca3af; font-style: italic;">Sin fotografía</p>'}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Configuraciones de html2pdf
+            const opt = {
+                margin:       [15, 15, 15, 15],
+                filename:     'Reporte_Papeleria.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Intentar generar el documento
+            try {
+                html2pdf().set(opt).from(container).save().then(() => {
+                    btn.innerHTML = btnText;
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error(err);
+                    alert("Error al crear el PDF. Asegúrate de tener conexión a internet la primera vez que usas este botón.");
+                    btn.innerHTML = btnText;
+                    btn.disabled = false;
+                });
+            } catch(e) {
+                alert("Error: Librería de PDF no cargada. Revisa tu conexión a internet.");
+                btn.innerHTML = btnText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- PROCESAMIENTO DE IMAGEN ---
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const max_size = 800; 
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > max_size) { height *= max_size / width; width = max_size; }
+                        } else {
+                            if (height > max_size) { width *= max_size / height; height = max_size; }
+                        }
+
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('imagePreview').src = currentPhotoBase64;
+                        document.getElementById('previewContainer').style.display = 'block';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function quitarImagen() {
+            document.getElementById('foto').value = '';
+            currentPhotoBase64 = null;
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+
+        // --- MANEJO DE FORMULARIO ---
+        document.getElementById('recordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('editId').value;
+            const empresa = document.getElementById('empresa').value.trim();
+            const enlaceMaps = document.getElementById('enlaceMaps').value.trim();
+            const notas = document.getElementById('notas').value.trim();
+
+            if (editId) {
+                const index = registros.findIndex(r => r.id == editId);
+                if (index !== -1) {
+                    registros[index].empresa = empresa;
+                    registros[index].enlaceMaps = enlaceMaps;
+                    registros[index].notas = notas;
+                    registros[index].foto = currentPhotoBase64;
+                }
             } else {
-                flashcards.push({ question: q, answer: a });
-                document.getElementById('question-input').value = '';
-                document.getElementById('answer-input').value = '';
-                document.getElementById('question-input').focus();
+                const nuevoRegistro = {
+                    id: Date.now(),
+                    empresa: empresa,
+                    enlaceMaps: enlaceMaps || null,
+                    notas: notas,
+                    foto: currentPhotoBase64 || null,
+                    fecha: new Date().toLocaleDateString('es-GT', { 
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
+                    })
+                };
+                registros.unshift(nuevoRegistro);
             }
 
-            saveData();
-            updateListUI();
-        }
+            guardarEnLocalStorage();
+            resetForm();
+            renderizarRegistros();
+        });
 
-        function editQuestion(index) {
-            editingIndex = index;
-            document.getElementById('question-input').value = flashcards[index].question;
-            document.getElementById('answer-input').value = flashcards[index].answer;
-            
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Guardar Cambios';
-            saveBtn.style.backgroundColor = 'var(--warning)';
-            
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            
-            updateListUI();
-            document.getElementById('question-input').focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' }); 
-        }
-
-        function cancelEdit() {
-            editingIndex = -1;
-            document.getElementById('question-input').value = '';
-            document.getElementById('answer-input').value = '';
-            
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.innerHTML = '<i class="fas fa-check-circle"></i> Guardar Pregunta';
-            saveBtn.style.backgroundColor = 'var(--primary)';
-            
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            updateListUI();
-        }
-
-        function deleteQuestion(index) {
-            if (confirm("¿Borrar permanentemente esta pregunta?")) {
-                if (editingIndex === index) cancelEdit();
-                flashcards.splice(index, 1);
-                saveData();
-                updateListUI();
+        function guardarEnLocalStorage() {
+            try {
+                localStorage.setItem('papeleria_registros', JSON.stringify(registros));
+            } catch (e) {
+                alert('Almacenamiento local lleno. Por favor, elimine registros antiguos o con fotos pesadas.');
             }
         }
 
-        function moveUp(index) {
-            if (index > 0) {
-                let temp = flashcards[index];
-                flashcards[index] = flashcards[index - 1];
-                flashcards[index - 1] = temp;
-                if (editingIndex === index) editingIndex = index - 1;
-                else if (editingIndex === index - 1) editingIndex = index;
-                saveData(); updateListUI();
-            }
-        }
+        // --- RENDERIZADO DE TARJETAS ---
+        function renderizarRegistros() {
+            const list = document.getElementById('recordsList');
+            list.innerHTML = '';
 
-        function moveDown(index) {
-            if (index < flashcards.length - 1) {
-                let temp = flashcards[index];
-                flashcards[index] = flashcards[index + 1];
-                flashcards[index + 1] = temp;
-                if (editingIndex === index) editingIndex = index + 1;
-                else if (editingIndex === index + 1) editingIndex = index;
-                saveData(); updateListUI();
-            }
-        }
-
-        function updateListUI() {
-            const listEl = document.getElementById('questions-list');
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            document.getElementById('count').innerText = flashcards.length;
-            listEl.innerHTML = '';
-
-            if (flashcards.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Aún no tienes preguntas en esta lista.</div>';
+            if (registros.length === 0) {
+                list.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #9ca3af; margin-bottom: 10px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <p style="color: var(--text-muted); font-size: 1.1rem;">No hay registros de papelería.</p>
+                        <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 5px;">Comienza agregando uno nuevo en el formulario superior.</p>
+                    </div>`;
                 return;
             }
 
-            let displayCards = flashcards.map((item, originalIndex) => ({ item, originalIndex }));
+            registros.forEach(reg => {
+                const card = document.createElement('div');
+                card.className = 'record-card';
 
-            if (searchTerm) {
-                displayCards = displayCards.filter(obj => 
-                    obj.item.question.toLowerCase().includes(searchTerm) || obj.item.answer.toLowerCase().includes(searchTerm)
-                );
-            }
+                let photoHTML = reg.foto 
+                    ? `<img src="${reg.foto}" class="record-img" alt="Foto ${reg.empresa}">`
+                    : `<div class="no-img">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        Sin fotografía adjunta
+                       </div>`;
 
-            if (displayCards.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Sin resultados para la búsqueda.</div>';
-                return;
-            }
+                let mapHTML = reg.enlaceMaps 
+                    ? `<a href="${reg.enlaceMaps}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        Ver en Google Maps
+                       </a>`
+                    : ``;
 
-            displayCards.forEach((obj) => {
-                const item = obj.item;
-                const index = obj.originalIndex;
-                let answerDisplay = item.answer !== "" ? item.answer : '<span class="no-answer"><i class="fas fa-exclamation-circle"></i> Pendiente de respuesta</span>';
-                
-                const isEditingClass = (index === editingIndex) ? 'editing' : '';
-                const disableMove = searchTerm ? 'disabled' : '';
+                let notasClase = reg.notas ? 'record-notes' : 'record-notes empty-notes';
+                let notasTexto = reg.notas ? reg.notas : 'Sin notas registradas.';
 
-                listEl.innerHTML += `
-                    <div class="question-item ${isEditingClass}">
-                        <div class="question-item-text">
-                            <strong>${index + 1}. P:</strong> ${item.question}<br>
-                            <strong style="color:var(--primary);">R:</strong> ${answerDisplay}
+                card.innerHTML = `
+                    ${photoHTML}
+                    <div class="record-content">
+                        <div class="record-header-card">
+                            <div class="record-title">${reg.empresa}</div>
                         </div>
-                        <div class="question-item-actions">
-                            <div class="action-btns">
-                                <button onclick="moveUp(${index})" class="btn-icon btn-move" ${disableMove}><i class="fas fa-arrow-up"></i></button>
-                                <button onclick="moveDown(${index})" class="btn-icon btn-move" ${disableMove}><i class="fas fa-arrow-down"></i></button>
-                            </div>
-                            <div class="action-btns">
-                                <button onclick="editQuestion(${index})" class="btn-icon btn-edit"><i class="fas fa-pen"></i></button>
-                                <button onclick="deleteQuestion(${index})" class="btn-icon btn-delete"><i class="fas fa-trash"></i></button>
+                        <div style="margin-bottom: 12px;"><span class="record-date">${reg.fecha}</span></div>
+                        
+                        <div class="${notasClase}">${notasTexto}</div>
+                        
+                        <div class="card-actions-wrapper">
+                            ${mapHTML}
+                            <div class="card-actions-row">
+                                <button class="action-btn btn-edit" onclick="cargarParaEditar(${reg.id})">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    Editar
+                                </button>
+                                <button class="action-btn btn-delete" onclick="eliminarRegistro(${reg.id})">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    Eliminar
+                                </button>
                             </div>
                         </div>
                     </div>
                 `;
+                list.appendChild(card);
             });
         }
 
-        // ==========================================
-        // EXPORTACIONES Y RESPALDOS
-        // ==========================================
-        function downloadBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `Respaldo_Estudio_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
-        }
+        // --- EDICIÓN Y ELIMINACIÓN ---
+        function cargarParaEditar(id) {
+            const reg = registros.find(r => r.id === id);
+            if (!reg) return;
 
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData && typeof importedData === 'object') {
-                        if(confirm("Esto reemplazará el contenido actual. ¿Continuar?")) {
-                            allData = importedData;
-                            localStorage.setItem('misCuestionarios', JSON.stringify(allData));
-                            currentQuizName = Object.keys(allData)[0];
-                            flashcards = allData[currentQuizName] || [];
-                            cancelEdit(); updateSelectorUI(); updateListUI();
-                            alert("Respaldo restaurado con éxito.");
-                        }
-                    }
-                } catch (err) { alert("El archivo no es válido."); }
-                event.target.value = ''; 
-            };
-            reader.readAsText(file);
-        }
+            document.getElementById('editId').value = reg.id;
+            document.getElementById('empresa').value = reg.empresa;
+            document.getElementById('enlaceMaps').value = reg.enlaceMaps || '';
+            document.getElementById('notas').value = reg.notas || '';
 
-        function exportPDF() {
-            if (flashcards.length === 0) { alert("No hay preguntas para exportar."); return; }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('portrait', 'mm', 'a4'); 
-            const pageWidth = doc.internal.pageSize.width;
-            const pageHeight = doc.internal.pageSize.height;
-
-            // Encabezado Premium
-            doc.setFillColor(30, 41, 59); // Slate-800
-            doc.rect(0, 0, pageWidth, 25, 'F'); 
-            
-            doc.setTextColor(255, 255, 255); 
-            doc.setFontSize(18); 
-            doc.setFont("helvetica", "bold");
-            doc.text("Guía Oficial de Preparación", 15, 16);
-
-            doc.setTextColor(203, 213, 225); 
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, pageWidth - 15, 16, { align: 'right' });
-
-            doc.setTextColor(15, 23, 42); 
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.text(`${currentQuizName}`, 15, 36);
-            
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(100, 116, 139); 
-            doc.text(`Preguntas Totales: ${flashcards.length}`, 15, 42);
-            
-            const tableData = flashcards.map((fc, i) => [ i + 1, fc.question, fc.answer !== "" ? fc.answer : "________________________________________________" ]);
-            
-            doc.autoTable({
-                startY: 48,
-                head: [['Nº', 'Pregunta', 'Respuesta Correcta']],
-                body: tableData,
-                theme: 'grid',
-                rowPageBreak: 'avoid', 
-                headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold', halign: 'center' }, // Color azul primary
-                bodyStyles: { textColor: [15, 23, 42], fontSize: 10, lineColor: [226, 232, 240] },
-                alternateRowStyles: { fillColor: [248, 250, 252] },
-                columnStyles: { 0: { cellWidth: 10, halign: 'center', fontStyle: 'bold' }, 1: { cellWidth: 85, fontStyle: 'bold' }, 2: { cellWidth: 85 } },
-                margin: { left: 15, right: 15, bottom: 20 },
-                didDrawPage: function (data) {
-                    doc.setFontSize(9); doc.setTextColor(148, 163, 184); 
-                    doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageWidth - 15, pageHeight - 10, { align: 'right' });
-                }
-            });
-            doc.save(currentQuizName.replace(/\s+/g, '_') + '_Manual.pdf');
-        }
-
-        // ==========================================
-        // ALGORITMO LEVENSHTEIN (TOLERANCIA A ERRORES DE DEDO)
-        // ==========================================
-        function levenshteinDistance(a, b) {
-            const matrix = [];
-            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
-                        );
-                    }
-                }
-            }
-            return matrix[b.length][a.length];
-        }
-
-        // ==========================================
-        // LÓGICA DE ESTUDIO INTELIGENTE
-        // ==========================================
-        function startStudy() {
-            if (flashcards.length === 0) { alert("Agrega preguntas primero."); return; }
-            
-            const pendientes = flashcards.filter(f => f.answer === "");
-            if (pendientes.length > 0) {
-                alert("Tienes preguntas marcadas como '(Sin respuesta aún)'. Llénalas antes de empezar el examen."); return;
-            }
-
-            const wantsShuffle = document.getElementById('shuffle-checkbox').checked;
-            studyCards = wantsShuffle ? shuffleArray(flashcards) : [...flashcards]; 
-            
-            currentIndex = 0; score = 0; sessionResults = [];
-            
-            document.getElementById('setup-section').classList.add('hidden');
-            document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('study-section').classList.remove('hidden');
-            showQuestion();
-        }
-
-        function showQuestion() {
-            const feedback = document.getElementById('feedback');
-            feedback.innerText = ''; feedback.classList.add('hidden');
-            document.getElementById('next-btn').classList.add('hidden');
-            document.getElementById('override-btn').classList.add('hidden');
-            
-            document.getElementById('question-counter').innerHTML = `<i class="fas fa-layer-group" style="color:var(--primary);"></i> Pregunta ${currentIndex + 1} de ${studyCards.length}`;
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
-            document.getElementById('display-question').innerText = studyCards[currentIndex].question;
-            
-            const txtInput = document.getElementById('user-answer');
-            document.getElementById('check-btn').classList.remove('hidden');
-            
-            txtInput.value = ''; txtInput.disabled = false; txtInput.focus();
-        }
-
-        function checkAnswer() {
-            const userAnswer = document.getElementById('user-answer').value.trim();
-            const correctAnswer = studyCards[currentIndex].answer.trim();
-            const feedback = document.getElementById('feedback');
-
-            if (userAnswer === "") { alert("Por favor escribe una respuesta para comprobar."); return; }
-
-            const normalize = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!]/g, " ").replace(/\s+/g, " ").trim();
-
-            const normUser = normalize(userAnswer);
-            const normCorrect = normalize(correctAnswer);
-
-            let isCorrect = false;
-            let isFuzzy = false;
-
-            // Nivel 1: Distancia de Levenshtein (Permite pequeños errores ortográficos)
-            const maxLen = Math.max(normUser.length, normCorrect.length);
-            const distance = levenshteinDistance(normUser, normCorrect);
-            const similarity = maxLen === 0 ? 1 : 1 - (distance / maxLen);
-
-            if (similarity >= 0.80) { // 80% de similitud es correcto
-                isCorrect = true;
+            if (reg.foto) {
+                currentPhotoBase64 = reg.foto;
+                document.getElementById('imagePreview').src = reg.foto;
+                document.getElementById('previewContainer').style.display = 'block';
             } else {
-                // Nivel 2: Coincidencia por Palabras Clave
-                const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'de', 'del', 'al', 'con', 'por', 'para', 'en', 'a', 'es', 'son', 'se', 'lo', 'que', 'como'];
-                const cWords = normCorrect.split(' ').filter(w => !stopWords.includes(w) && w.length > 2);
-                
-                if (cWords.length > 0) {
-                    let matches = 0;
-                    cWords.forEach(cw => { if (normUser.includes(cw)) matches++; });
-                    if ((matches / cWords.length) >= 0.7) { isCorrect = true; isFuzzy = true; }
-                } else if (normUser.includes(normCorrect)) {
-                    isCorrect = true; isFuzzy = true;
-                }
+                quitarImagen();
             }
 
-            feedback.classList.remove('hidden');
+            document.getElementById('formTitle').innerHTML = '✏️ Editar Registro';
+            document.getElementById('saveBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.42-5.42"/></svg> Actualizar Registro';
+            document.getElementById('cancelBtn').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-            if (isCorrect) {
-                score++;
-                if (similarity >= 0.80 && similarity < 1) {
-                    feedback.innerHTML = `<i class="fas fa-check-circle"></i> ¡Correcto! (Contiene errores ortográficos pequeños).<br><span style="font-size:14px; font-weight:normal; color:#065f46; display:block; margin-top:5px;">Respuesta oficial: <b>${correctAnswer}</b></span>`;
-                } else if (isFuzzy) {
-                    feedback.innerHTML = `<i class="fas fa-check-double"></i> ¡Idea correcta!<br><span style="font-size:14px; font-weight:normal; color:#065f46; display:block; margin-top:5px;">Respuesta oficial: <b>${correctAnswer}</b></span>`;
-                } else {
-                    feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Exacto, respuesta perfecta!';
-                }
-                feedback.className = "feedback correct";
-                document.getElementById('override-btn').classList.add('hidden');
-            } else {
-                feedback.innerHTML = `<i class="fas fa-times-circle"></i> Incorrecto.<br><span style="font-size:14px; font-weight:normal; color:#991b1b; display:block; margin-top:5px;">La respuesta oficial es: <b>${correctAnswer}</b></span>`;
-                feedback.className = "feedback incorrect";
-                document.getElementById('override-btn').classList.remove('hidden'); // Botón de forzar acierto
+        function eliminarRegistro(id) {
+            if (confirm('¿Está seguro de que desea eliminar este registro de forma permanente?')) {
+                registros = registros.filter(r => r.id !== id);
+                guardarEnLocalStorage();
+                renderizarRegistros();
             }
-            
-            // Guardar resultado para el resumen final
-            sessionResults.push({
-                question: studyCards[currentIndex].question,
-                correctAnswer: correctAnswer,
-                userAnswer: userAnswer,
-                isCorrect: isCorrect
-            });
-            
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
-            document.getElementById('user-answer').disabled = true;
-            document.getElementById('check-btn').classList.add('hidden');
-            document.getElementById('next-btn').classList.remove('hidden');
         }
 
-        function overrideCorrect() {
-            score++;
-            sessionResults[sessionResults.length - 1].isCorrect = true; // Actualiza el historial
-            
-            document.getElementById('score-counter').innerHTML = `<i class="fas fa-star" style="color:var(--warning);"></i> ${score} Puntos`;
-            const feedback = document.getElementById('feedback');
-            feedback.innerHTML = '<i class="fas fa-user-check"></i> ¡Punto reclamado manualmente!';
-            feedback.className = "feedback correct";
-            
-            document.getElementById('override-btn').classList.add('hidden');
+        function resetForm() {
+            document.getElementById('recordForm').reset();
+            document.getElementById('editId').value = '';
+            quitarImagen();
+            document.getElementById('formTitle').textContent = 'Nuevo Registro';
+            document.getElementById('saveBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar Registro';
+            document.getElementById('cancelBtn').style.display = 'none';
         }
 
-        function nextQuestion() {
-            currentIndex++;
-            if (currentIndex < studyCards.length) showQuestion();
-            else showResults();
-        }
+        // --- LÓGICA DE INSTALACIÓN PWA ---
+        let deferredPrompt;
+        const installButton = document.getElementById('installPWA');
 
-        function showResults() {
-            document.getElementById('study-section').classList.add('hidden');
-            document.getElementById('results-section').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${score} / ${studyCards.length}`;
-            
-            const message = document.getElementById('final-message');
-            const porcentaje = score / studyCards.length;
-            
-            if (porcentaje === 1) message.innerText = "¡Excelente! Dominas completamente el tema.";
-            else if (porcentaje >= 0.7) message.innerText = "¡Muy bien! Un pequeño repaso más a los errores y estarás listo.";
-            else message.innerText = "Hay que seguir repasando. Concéntrate en la lista de errores abajo.";
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'flex';
+        });
 
-            // Renderizar resumen de errores
-            const mistakesList = document.getElementById('mistakes-list');
-            mistakesList.innerHTML = '';
-            
-            const mistakes = sessionResults.filter(r => !r.isCorrect);
-            if (mistakes.length > 0) {
-                mistakesList.innerHTML = '<h3 style="color:var(--danger); font-size:18px; margin-top:20px; border-bottom:2px solid #fecaca; padding-bottom:10px;"><i class="fas fa-clipboard-list"></i> Preguntas a repasar:</h3>';
-                mistakes.forEach(m => {
-                    mistakesList.innerHTML += `
-                    <div class="mistake-card">
-                        <p style="margin:0 0 8px 0; color:var(--text-main);"><strong>P:</strong> ${m.question}</p>
-                        <p style="margin:0 0 5px 0; color:var(--danger);"><strong>Tu respuesta:</strong> <del>${m.userAnswer}</del></p>
-                        <p style="margin:0; color:var(--success);"><strong>Respuesta oficial:</strong> ${m.correctAnswer}</p>
-                    </div>`;
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            installButton.style.display = 'none';
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(error => {
+                    console.log('Error al registrar ServiceWorker:', error);
                 });
-            } else {
-                mistakesList.innerHTML = '<div style="background:var(--success-light); border:1px solid #a7f3d0; padding:15px; border-radius:10px; color:#065f46; text-align:center; font-weight:600; margin-top:20px;"><i class="fas fa-trophy"></i> ¡Cero errores! Estudio perfecto.</div>';
-            }
+            });
         }
-
-        function restartStudy() { startStudy(); }
     </script>
 </body>
 </html>
