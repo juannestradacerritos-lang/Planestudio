@@ -115,6 +115,7 @@
 
         input[type="text"], 
         input[type="url"], 
+        input[type="date"],
         textarea, 
         input[type="file"] {
             width: 100%;
@@ -128,6 +129,7 @@
 
         input[type="text"]:focus, 
         input[type="url"]:focus, 
+        input[type="date"]:focus,
         textarea:focus {
             outline: none;
             border-color: var(--secondary-color);
@@ -319,13 +321,14 @@
         }
 
         .record-date {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background-color: #f3f4f6;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: 500;
-            white-space: nowrap;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            background-color: #eff6ff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+            border: 1px solid #bfdbfe;
         }
 
         .record-notes {
@@ -399,7 +402,6 @@
             align-items: center;
             gap: 8px;
         }
-
     </style>
 </head>
 <body>
@@ -424,12 +426,17 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="enlaceMaps">2. Enlace de Google Maps:</label>
+                    <label for="fechaEntrega">2. Fecha de entrega:</label>
+                    <input type="date" id="fechaEntrega" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="enlaceMaps">3. Enlace de Google Maps:</label>
                     <input type="url" id="enlaceMaps" placeholder="https://maps.app.goo.gl/...">
                 </div>
 
                 <div class="form-group">
-                    <label for="foto">3. Fotografía de evidencia:</label>
+                    <label for="foto">4. Fotografía de evidencia:</label>
                     <input type="file" id="foto" accept="image/*" onchange="previewImage(event)">
                     
                     <div class="preview-img-container" id="previewContainer">
@@ -442,7 +449,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="notas">4. Notas:</label>
+                    <label for="notas">5. Notas:</label>
                     <textarea id="notas" placeholder="Instrucciones, persona que recibió, fecha de seguimiento..."></textarea>
                 </div>
 
@@ -480,6 +487,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderizarRegistros();
             checkNetworkStatus();
+            // Colocar la fecha de hoy por defecto al cargar
+            document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
         });
 
         // --- MANEJO DE RED (Online/Offline) ---
@@ -512,7 +521,6 @@
             btn.innerHTML = '⏳ Generando...';
             btn.disabled = true;
 
-            // Crear un contenedor invisible para dar formato al PDF
             const container = document.createElement('div');
             container.style.padding = '20px';
             container.style.fontFamily = 'Helvetica, Arial, sans-serif';
@@ -521,15 +529,22 @@
             let html = `
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1 style="color: #1e3a8a; margin-bottom: 5px;">Reporte de Control de Papelería</h1>
-                    <p style="color: #6b7280; font-size: 14px;">Documento generado el ${new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</p>
+                    <p style="color: #6b7280; font-size: 14px;">Documento generado el ${new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
             `;
 
             registros.forEach((reg, index) => {
+                // Formatear la fecha ingresada para el PDF
+                let fechaDisplay = reg.fecha; 
+                if (reg.fechaEntrega) {
+                    const [yyyy, mm, dd] = reg.fechaEntrega.split('-');
+                    fechaDisplay = `${dd}/${mm}/${yyyy}`;
+                }
+
                 html += `
                     <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e5e7eb; page-break-inside: avoid;">
                         <h2 style="color: #2563eb; font-size: 18px; margin-bottom: 10px;">${index + 1}. ${reg.empresa}</h2>
-                        <p style="margin-bottom: 6px; font-size: 14px;"><strong>📅 Fecha:</strong> ${reg.fecha}</p>
+                        <p style="margin-bottom: 6px; font-size: 14px; color: #1e3a8a;"><strong>📅 Fecha de entrega:</strong> ${fechaDisplay}</p>
                         <p style="margin-bottom: 8px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px;"><strong>📝 Notas:</strong> <br>${reg.notas || 'Sin notas.'}</p>
                         ${reg.enlaceMaps ? `<p style="margin-bottom: 10px; font-size: 14px;"><strong>🗺️ Mapa:</strong> <a href="${reg.enlaceMaps}" style="color: #10b981;">Enlace de ubicación</a></p>` : ''}
                         ${reg.foto ? `<div style="margin-top: 15px;"><img src="${reg.foto}" style="max-height: 250px; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;"></div>` : '<p style="font-size: 12px; color: #9ca3af; font-style: italic;">Sin fotografía</p>'}
@@ -539,7 +554,6 @@
 
             container.innerHTML = html;
 
-            // Configuraciones de html2pdf
             const opt = {
                 margin:       [15, 15, 15, 15],
                 filename:     'Reporte_Papeleria.pdf',
@@ -548,7 +562,6 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Intentar generar el documento
             try {
                 html2pdf().set(opt).from(container).save().then(() => {
                     btn.innerHTML = btnText;
@@ -611,6 +624,7 @@
 
             const editId = document.getElementById('editId').value;
             const empresa = document.getElementById('empresa').value.trim();
+            const fechaEntrega = document.getElementById('fechaEntrega').value;
             const enlaceMaps = document.getElementById('enlaceMaps').value.trim();
             const notas = document.getElementById('notas').value.trim();
 
@@ -618,20 +632,22 @@
                 const index = registros.findIndex(r => r.id == editId);
                 if (index !== -1) {
                     registros[index].empresa = empresa;
+                    registros[index].fechaEntrega = fechaEntrega;
                     registros[index].enlaceMaps = enlaceMaps;
                     registros[index].notas = notas;
-                    registros[index].foto = currentPhotoBase64;
+                    if(currentPhotoBase64 !== null) registros[index].foto = currentPhotoBase64;
                 }
             } else {
                 const nuevoRegistro = {
                     id: Date.now(),
                     empresa: empresa,
+                    fechaEntrega: fechaEntrega,
                     enlaceMaps: enlaceMaps || null,
                     notas: notas,
                     foto: currentPhotoBase64 || null,
                     fecha: new Date().toLocaleDateString('es-GT', { 
-                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' 
-                    })
+                        year: 'numeric', month: 'short', day: 'numeric' 
+                    }) 
                 };
                 registros.unshift(nuevoRegistro);
             }
@@ -685,13 +701,22 @@
                 let notasClase = reg.notas ? 'record-notes' : 'record-notes empty-notes';
                 let notasTexto = reg.notas ? reg.notas : 'Sin notas registradas.';
 
+                // Formatear la fecha para la tarjeta (si viene de input date es YYYY-MM-DD)
+                let fechaDisplay = reg.fecha; 
+                if (reg.fechaEntrega) {
+                    const [yyyy, mm, dd] = reg.fechaEntrega.split('-');
+                    fechaDisplay = `${dd}/${mm}/${yyyy}`;
+                }
+
                 card.innerHTML = `
                     ${photoHTML}
                     <div class="record-content">
                         <div class="record-header-card">
                             <div class="record-title">${reg.empresa}</div>
                         </div>
-                        <div style="margin-bottom: 12px;"><span class="record-date">${reg.fecha}</span></div>
+                        <div style="margin-bottom: 15px;">
+                            <span class="record-date">📅 Entregado: ${fechaDisplay}</span>
+                        </div>
                         
                         <div class="${notasClase}">${notasTexto}</div>
                         
@@ -723,6 +748,13 @@
             document.getElementById('empresa').value = reg.empresa;
             document.getElementById('enlaceMaps').value = reg.enlaceMaps || '';
             document.getElementById('notas').value = reg.notas || '';
+            
+            // Cargar fecha si existe, si no, poner la de hoy
+            if(reg.fechaEntrega) {
+                document.getElementById('fechaEntrega').value = reg.fechaEntrega;
+            } else {
+                document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
+            }
 
             if (reg.foto) {
                 currentPhotoBase64 = reg.foto;
@@ -749,6 +781,7 @@
         function resetForm() {
             document.getElementById('recordForm').reset();
             document.getElementById('editId').value = '';
+            document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
             quitarImagen();
             document.getElementById('formTitle').textContent = 'Nuevo Registro';
             document.getElementById('saveBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar Registro';
