@@ -1,4 +1,4 @@
-const CACHE_NAME = 'papeleria-v1';
+const CACHE_NAME = 'papeleria-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -6,7 +6,6 @@ const urlsToCache = [
   './icon.svg'
 ];
 
-// Instalar Service Worker y cachear recursos estáticos
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -16,18 +15,15 @@ self.addEventListener('install', event => {
   );
 });
 
-// Interceptar peticiones para funcionar offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Devuelve el recurso del caché si existe, sino hace la petición de red
         return response || fetch(event.request);
       })
   );
 });
 
-// Actualizar el Service Worker y limpiar cachés antiguos
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
