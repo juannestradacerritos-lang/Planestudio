@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Papelería</title>
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1e3a8a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,17 +12,16 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
 
-    <!-- Librería para generar el PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --primary-color: #1e3a8a; /* Azul ejecutivo profundo */
-            --secondary-color: #2563eb; /* Azul brillante para acciones */
-            --accent-color: #10b981; /* Verde esmeralda */
-            --danger-color: #ef4444; /* Rojo suave */
-            --warning-color: #f59e0b; /* Ambar */
-            --background: #f3f4f6; /* Gris muy claro */
+            --primary-color: #1e3a8a; 
+            --secondary-color: #2563eb; 
+            --accent-color: #10b981; 
+            --danger-color: #ef4444; 
+            --warning-color: #f59e0b; 
+            --background: #f3f4f6; 
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
@@ -50,7 +48,6 @@
             margin: 0 auto;
         }
 
-        /* Header Ejecutivo */
         header {
             text-align: center;
             margin-bottom: 30px;
@@ -80,11 +77,8 @@
             transition: all 0.3s ease;
         }
 
-        #network-status.offline {
-            background-color: var(--danger-color);
-        }
+        #network-status.offline { background-color: var(--danger-color); }
 
-        /* Sección de Formulario */
         .form-section {
             background: var(--card-bg);
             padding: 24px;
@@ -101,9 +95,7 @@
             font-weight: 600;
         }
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+        .form-group { margin-bottom: 18px; }
 
         label {
             display: block;
@@ -127,26 +119,16 @@
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        input[type="text"]:focus, 
-        input[type="url"]:focus, 
-        input[type="date"]:focus,
-        textarea:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             background-color: #fff;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+        textarea { resize: vertical; min-height: 100px; }
 
-        input[type="file"] {
-            padding: 10px;
-            background-color: #fff;
-            cursor: pointer;
-        }
+        input[type="file"] { padding: 10px; background-color: #fff; cursor: pointer; }
         input[type="file"]::file-selector-button {
             background-color: var(--primary-color);
             color: white;
@@ -158,9 +140,7 @@
             font-weight: 600;
             transition: background-color 0.2s;
         }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #1e40af;
-        }
+        input[type="file"]::file-selector-button:hover { background-color: #1e40af; }
 
         .submit-btn {
             background-color: var(--secondary-color);
@@ -172,14 +152,12 @@
             cursor: pointer;
             width: 100%;
             font-weight: 600;
-            transition: background-color 0.2s, transform 0.1s;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
         }
         .submit-btn:hover { background-color: #1d4ed8; }
-        .submit-btn:active { transform: scale(0.98); }
 
         .cancel-btn {
             background-color: var(--text-muted);
@@ -193,7 +171,6 @@
             font-weight: 600;
             margin-top: 10px;
             display: none;
-            transition: background-color 0.2s;
         }
         .cancel-btn:hover { background-color: #4b5563; }
 
@@ -228,9 +205,7 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-remove-img:hover { background-color: #fef2f2; }
 
-        /* Lista de Registros */
         .records-header {
             display: flex;
             justify-content: space-between;
@@ -253,10 +228,8 @@
             align-items: center;
             gap: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: background 0.2s;
         }
         .btn-pdf:hover { background-color: #059669; }
-        .btn-pdf:disabled { background-color: #9ca3af; cursor: not-allowed; }
 
         .records-list {
             display: grid;
@@ -268,15 +241,10 @@
             background: var(--card-bg);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .record-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         .record-img {
@@ -297,7 +265,6 @@
             border-bottom: 1px solid var(--border-color);
             font-size: 0.9rem;
         }
-        .no-img svg { width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.5; }
 
         .record-content {
             padding: 20px;
@@ -306,18 +273,11 @@
             flex-direction: column;
         }
 
-        .record-header-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
         .record-title {
             font-size: 1.15rem;
             font-weight: 700;
             color: var(--primary-color);
-            line-height: 1.3;
+            margin-bottom: 8px;
         }
 
         .record-date {
@@ -342,7 +302,6 @@
             border-radius: 8px;
             border-left: 3px solid var(--accent-color);
         }
-        .empty-notes { font-style: italic; color: var(--text-muted); border-left-color: var(--border-color); }
 
         .card-actions-wrapper { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 
@@ -357,9 +316,7 @@
             font-weight: 600;
             display: flex;
             justify-content: center;
-            align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
         }
         .btn-gmaps:hover { background-color: #eff6ff; }
 
@@ -373,35 +330,13 @@
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            text-align: center;
             display: flex;
             justify-content: center;
-            align-items: center;
             gap: 6px;
         }
-        .action-btn:hover { opacity: 0.9; }
 
         .btn-edit { background-color: var(--warning-color); color: white; }
         .btn-delete { background-color: var(--danger-color); color: white; }
-
-        #installPWA {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
-            cursor: pointer;
-            z-index: 1000;
-            align-items: center;
-            gap: 8px;
-        }
     </style>
 </head>
 <body>
@@ -422,7 +357,7 @@
 
                 <div class="form-group">
                     <label for="empresa">1. Empresa / Nombre del Lugar:</label>
-                    <input type="text" id="empresa" placeholder="Ej. Oficinas Centrales de Recursos Humanos" required>
+                    <input type="text" id="empresa" placeholder="Ej. Oficinas Centrales" required>
                 </div>
                 
                 <div class="form-group">
@@ -438,63 +373,56 @@
                 <div class="form-group">
                     <label for="foto">4. Fotografía de evidencia:</label>
                     <input type="file" id="foto" accept="image/*" onchange="previewImage(event)">
-                    
                     <div class="preview-img-container" id="previewContainer">
                         <img id="imagePreview" src="" alt="Vista previa">
-                        <button type="button" class="btn-remove-img" onclick="quitarImagen()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Quitar imagen
-                        </button>
+                        <button type="button" class="btn-remove-img" onclick="quitarImagen()">🗑️ Quitar imagen</button>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="notas">5. Notas:</label>
-                    <textarea id="notas" placeholder="Instrucciones, persona que recibió, fecha de seguimiento..."></textarea>
+                    <textarea id="notas" placeholder="Instrucciones, persona que recibió..."></textarea>
                 </div>
 
-                <button type="submit" class="submit-btn" id="saveBtn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                    Guardar Registro
-                </button>
+                <button type="submit" class="submit-btn" id="saveBtn">💾 Guardar Registro</button>
                 <button type="button" class="cancel-btn" id="cancelBtn" onclick="resetForm()">Cancelar Edición</button>
             </form>
         </div>
 
         <div class="records-header">
             <h2>Registros Guardados</h2>
-            <button class="btn-pdf" id="btnDescargarPDF" onclick="generarPDF()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
-                Descargar PDF
-            </button>
+            <button class="btn-pdf" id="btnDescargarPDF" onclick="generarPDF()">📄 Descargar PDF</button>
         </div>
         
-        <div class="records-list" id="recordsList">
-            <!-- Tarjetas dinámicas -->
-        </div>
+        <div class="records-list" id="recordsList"></div>
     </div>
 
-    <!-- PWA Install Prompt -->
-    <button id="installPWA" style="display: none;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Instalar Aplicación
-    </button>
-
     <script>
+        // Limpiador automático de caché PWA para que reconozca siempre el nuevo código
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                for (let name of names) caches.delete(name);
+            });
+        }
+
+        // Función robusta para zona horaria (evita que la fecha salte de día)
+        function obtenerFechaLocal() {
+            const hoy = new Date();
+            hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+            return hoy.toISOString().split('T')[0];
+        }
+
         let registros = JSON.parse(localStorage.getItem('papeleria_registros')) || [];
         let currentPhotoBase64 = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderizarRegistros();
             checkNetworkStatus();
-            // Colocar la fecha de hoy por defecto al cargar
-            document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaEntrega').value = obtenerFechaLocal();
         });
 
-        // --- MANEJO DE RED (Online/Offline) ---
         function checkNetworkStatus() {
             const statusIndicator = document.getElementById('network-status');
-            
             function updateStatus() {
                 if (navigator.onLine) {
                     statusIndicator.textContent = "🟢 Modo Conectado";
@@ -509,7 +437,6 @@
             updateStatus();
         }
 
-        // --- GENERADOR DE PDF ---
         function generarPDF() {
             if (registros.length === 0) {
                 alert("No hay registros guardados para exportar.");
@@ -524,21 +451,16 @@
             const container = document.createElement('div');
             container.style.padding = '20px';
             container.style.fontFamily = 'Helvetica, Arial, sans-serif';
-            container.style.color = '#333';
 
-            let html = `
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #1e3a8a; margin-bottom: 5px;">Reporte de Control de Papelería</h1>
-                    <p style="color: #6b7280; font-size: 14px;">Documento generado el ${new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
-            `;
+            let html = `<div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #1e3a8a; margin-bottom: 5px;">Reporte de Control de Papelería</h1>
+                        </div>`;
 
             registros.forEach((reg, index) => {
-                // Formatear la fecha ingresada para el PDF
-                let fechaDisplay = reg.fecha; 
-                if (reg.fechaEntrega) {
-                    const [yyyy, mm, dd] = reg.fechaEntrega.split('-');
-                    fechaDisplay = `${dd}/${mm}/${yyyy}`;
+                let fechaDisplay = reg.fecha || 'Fecha no registrada'; 
+                if (reg.fechaEntrega && reg.fechaEntrega.includes('-')) {
+                    const partes = reg.fechaEntrega.split('-');
+                    if (partes.length === 3) fechaDisplay = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 }
 
                 html += `
@@ -547,7 +469,7 @@
                         <p style="margin-bottom: 6px; font-size: 14px; color: #1e3a8a;"><strong>📅 Fecha de entrega:</strong> ${fechaDisplay}</p>
                         <p style="margin-bottom: 8px; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px;"><strong>📝 Notas:</strong> <br>${reg.notas || 'Sin notas.'}</p>
                         ${reg.enlaceMaps ? `<p style="margin-bottom: 10px; font-size: 14px;"><strong>🗺️ Mapa:</strong> <a href="${reg.enlaceMaps}" style="color: #10b981;">Enlace de ubicación</a></p>` : ''}
-                        ${reg.foto ? `<div style="margin-top: 15px;"><img src="${reg.foto}" style="max-height: 250px; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;"></div>` : '<p style="font-size: 12px; color: #9ca3af; font-style: italic;">Sin fotografía</p>'}
+                        ${reg.foto ? `<div style="margin-top: 15px;"><img src="${reg.foto}" style="max-height: 250px; border-radius: 8px;"></div>` : ''}
                     </div>
                 `;
             });
@@ -566,20 +488,18 @@
                 html2pdf().set(opt).from(container).save().then(() => {
                     btn.innerHTML = btnText;
                     btn.disabled = false;
-                }).catch(err => {
-                    console.error(err);
-                    alert("Error al crear el PDF. Asegúrate de tener conexión a internet la primera vez que usas este botón.");
+                }).catch(() => {
+                    alert("Error. Asegúrate de tener conexión a internet la primera vez.");
                     btn.innerHTML = btnText;
                     btn.disabled = false;
                 });
             } catch(e) {
-                alert("Error: Librería de PDF no cargada. Revisa tu conexión a internet.");
+                alert("Librería de PDF no cargada. Revisa tu conexión a internet.");
                 btn.innerHTML = btnText;
                 btn.disabled = false;
             }
         }
 
-        // --- PROCESAMIENTO DE IMAGEN ---
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -588,20 +508,13 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const max_size = 800; 
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > max_size) { height *= max_size / width; width = max_size; }
-                        } else {
-                            if (height > max_size) { width *= max_size / height; height = max_size; }
-                        }
-
-                        canvas.width = width; canvas.height = height;
+                        const max = 800; 
+                        let w = img.width, h = img.height;
+                        if (w > h) { if (w > max) { h *= max / w; w = max; } } 
+                        else { if (h > max) { w *= max / h; h = max; } }
+                        canvas.width = w; canvas.height = h;
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
+                        ctx.drawImage(img, 0, 0, w, h);
                         currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         document.getElementById('imagePreview').src = currentPhotoBase64;
                         document.getElementById('previewContainer').style.display = 'block';
@@ -618,10 +531,8 @@
             document.getElementById('previewContainer').style.display = 'none';
         }
 
-        // --- MANEJO DE FORMULARIO ---
         document.getElementById('recordForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
             const editId = document.getElementById('editId').value;
             const empresa = document.getElementById('empresa').value.trim();
             const fechaEntrega = document.getElementById('fechaEntrega').value;
@@ -645,38 +556,27 @@
                     enlaceMaps: enlaceMaps || null,
                     notas: notas,
                     foto: currentPhotoBase64 || null,
-                    fecha: new Date().toLocaleDateString('es-GT', { 
-                        year: 'numeric', month: 'short', day: 'numeric' 
-                    }) 
+                    fecha: new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'short', day: 'numeric' }) 
                 };
                 registros.unshift(nuevoRegistro);
             }
 
-            guardarEnLocalStorage();
+            try {
+                localStorage.setItem('papeleria_registros', JSON.stringify(registros));
+            } catch (e) {
+                alert('Almacenamiento lleno. Elimine registros antiguos.');
+            }
+            
             resetForm();
             renderizarRegistros();
         });
 
-        function guardarEnLocalStorage() {
-            try {
-                localStorage.setItem('papeleria_registros', JSON.stringify(registros));
-            } catch (e) {
-                alert('Almacenamiento local lleno. Por favor, elimine registros antiguos o con fotos pesadas.');
-            }
-        }
-
-        // --- RENDERIZADO DE TARJETAS ---
         function renderizarRegistros() {
             const list = document.getElementById('recordsList');
             list.innerHTML = '';
 
             if (registros.length === 0) {
-                list.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border-color);">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #9ca3af; margin-bottom: 10px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <p style="color: var(--text-muted); font-size: 1.1rem;">No hay registros de papelería.</p>
-                        <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 5px;">Comienza agregando uno nuevo en el formulario superior.</p>
-                    </div>`;
+                list.innerHTML = `<p style="text-align:center; padding: 20px;">No hay registros de papelería.</p>`;
                 return;
             }
 
@@ -685,52 +585,32 @@
                 card.className = 'record-card';
 
                 let photoHTML = reg.foto 
-                    ? `<img src="${reg.foto}" class="record-img" alt="Foto ${reg.empresa}">`
-                    : `<div class="no-img">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                        Sin fotografía adjunta
-                       </div>`;
+                    ? `<img src="${reg.foto}" class="record-img">`
+                    : `<div class="no-img">Sin fotografía</div>`;
 
                 let mapHTML = reg.enlaceMaps 
-                    ? `<a href="${reg.enlaceMaps}" target="_blank" rel="noopener noreferrer" class="btn-gmaps">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        Ver en Google Maps
-                       </a>`
-                    : ``;
+                    ? `<a href="${reg.enlaceMaps}" target="_blank" class="btn-gmaps">🗺️ Ver Mapa</a>` : ``;
 
-                let notasClase = reg.notas ? 'record-notes' : 'record-notes empty-notes';
-                let notasTexto = reg.notas ? reg.notas : 'Sin notas registradas.';
-
-                // Formatear la fecha para la tarjeta (si viene de input date es YYYY-MM-DD)
-                let fechaDisplay = reg.fecha; 
-                if (reg.fechaEntrega) {
-                    const [yyyy, mm, dd] = reg.fechaEntrega.split('-');
-                    fechaDisplay = `${dd}/${mm}/${yyyy}`;
+                // Procesamiento súper robusto para que la fecha nunca se pierda
+                let fechaDisplay = reg.fecha || 'Sin fecha registrada'; 
+                if (reg.fechaEntrega && reg.fechaEntrega.includes('-')) {
+                    const partes = reg.fechaEntrega.split('-');
+                    if (partes.length === 3) fechaDisplay = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 }
 
                 card.innerHTML = `
                     ${photoHTML}
                     <div class="record-content">
-                        <div class="record-header-card">
-                            <div class="record-title">${reg.empresa}</div>
-                        </div>
+                        <div class="record-title">${reg.empresa}</div>
                         <div style="margin-bottom: 15px;">
                             <span class="record-date">📅 Entregado: ${fechaDisplay}</span>
                         </div>
-                        
-                        <div class="${notasClase}">${notasTexto}</div>
-                        
+                        <div class="record-notes">${reg.notas || 'Sin notas registradas.'}</div>
                         <div class="card-actions-wrapper">
                             ${mapHTML}
                             <div class="card-actions-row">
-                                <button class="action-btn btn-edit" onclick="cargarParaEditar(${reg.id})">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                    Editar
-                                </button>
-                                <button class="action-btn btn-delete" onclick="eliminarRegistro(${reg.id})">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    Eliminar
-                                </button>
+                                <button class="action-btn btn-edit" onclick="cargarParaEditar(${reg.id})">✏️ Editar</button>
+                                <button class="action-btn btn-delete" onclick="eliminarRegistro(${reg.id})">🗑️ Eliminar</button>
                             </div>
                         </div>
                     </div>
@@ -739,7 +619,6 @@
             });
         }
 
-        // --- EDICIÓN Y ELIMINACIÓN ---
         function cargarParaEditar(id) {
             const reg = registros.find(r => r.id === id);
             if (!reg) return;
@@ -749,12 +628,7 @@
             document.getElementById('enlaceMaps').value = reg.enlaceMaps || '';
             document.getElementById('notas').value = reg.notas || '';
             
-            // Cargar fecha si existe, si no, poner la de hoy
-            if(reg.fechaEntrega) {
-                document.getElementById('fechaEntrega').value = reg.fechaEntrega;
-            } else {
-                document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
-            }
+            document.getElementById('fechaEntrega').value = reg.fechaEntrega || obtenerFechaLocal();
 
             if (reg.foto) {
                 currentPhotoBase64 = reg.foto;
@@ -765,15 +639,15 @@
             }
 
             document.getElementById('formTitle').innerHTML = '✏️ Editar Registro';
-            document.getElementById('saveBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.42-5.42"/></svg> Actualizar Registro';
+            document.getElementById('saveBtn').innerHTML = '🔄 Actualizar Registro';
             document.getElementById('cancelBtn').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function eliminarRegistro(id) {
-            if (confirm('¿Está seguro de que desea eliminar este registro de forma permanente?')) {
+            if (confirm('¿Está seguro de que desea eliminar este registro?')) {
                 registros = registros.filter(r => r.id !== id);
-                guardarEnLocalStorage();
+                localStorage.setItem('papeleria_registros', JSON.stringify(registros));
                 renderizarRegistros();
             }
         }
@@ -781,41 +655,16 @@
         function resetForm() {
             document.getElementById('recordForm').reset();
             document.getElementById('editId').value = '';
-            document.getElementById('fechaEntrega').value = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaEntrega').value = obtenerFechaLocal();
             quitarImagen();
             document.getElementById('formTitle').textContent = 'Nuevo Registro';
-            document.getElementById('saveBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar Registro';
+            document.getElementById('saveBtn').innerHTML = '💾 Guardar Registro';
             document.getElementById('cancelBtn').style.display = 'none';
         }
 
-        // --- LÓGICA DE INSTALACIÓN PWA ---
-        let deferredPrompt;
-        const installButton = document.getElementById('installPWA');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installButton.style.display = 'flex';
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                installButton.style.display = 'none';
-            }
-        });
-        
-        window.addEventListener('appinstalled', () => {
-            installButton.style.display = 'none';
-        });
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(error => {
-                    console.log('Error al registrar ServiceWorker:', error);
-                });
+                navigator.serviceWorker.register('sw.js').catch(error => console.log('Error SW:', error));
             });
         }
     </script>
