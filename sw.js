@@ -1,44 +1,50 @@
-const CACHE_NAME = 'papeleria-v1';
+const CACHE_NAME = 'papeleria-v3';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png'
 ];
 
-// Instalar Service Worker y cachear recursos estáticos
+// Instalar Service Worker
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Fuerza la instalación inmediata
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// Interceptar peticiones para funcionar offline
+// Estrategia: "Internet primero, luego Caché" (Ideal para ver cambios en vivo)
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // Devuelve el recurso del caché si existe, sino hace la petición de red
-        return response || fetch(event.request);
+        // Si hay internet, obtenemos la versión más reciente y la guardamos en caché
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      })
+      .catch(() => {
+        // Si NO hay internet, entonces sacamos la versión guardada en la caché
+        return caches.match(event.request);
       })
   );
 });
 
-// Actualizar el Service Worker y limpiar cachés antiguos
+// Limpiar cachés antiguas
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
